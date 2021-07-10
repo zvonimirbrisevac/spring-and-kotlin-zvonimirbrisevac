@@ -85,9 +85,6 @@ object Library {
 
 fun main(args: Array<String>) {
 
-    println("${Book("bzvz", "bzvz", 1) == Book("bzvz", "bzvz", 1)}")
-    println("${Book("bzvz","bzvz", 1) == Book("bzvz", "bzvz", 2)}")
-
     println("Book \"Milk Fed\" by Melissa Broder is avaliable: " +
             "${Library.isBookAvailable("Milk Fed", "Melissa Broder")}") // prints true
     println("Book \"Let me tell you wath I mean\" by Joan Didion is avaliable: " +

@@ -25,25 +25,41 @@ data class Course(
 )
 
 @Component
-class InMemoryCourseRepository (dataSource: DataSource): CourseRepository {
+class CourseService(
+    private val repository: CourseRepository
+) {
+
+    fun insertCourse(courseName: String): Long = repository.insert(courseName)
+
+    fun findCourseById(courseId: Long) = repository.findById(courseId)
+
+    fun deleteCourseById(courseId: Long) = repository.deleteById(courseId)
+}
+
+@Component
+class InMemoryCourseRepository(dataSource: DataSource) : CourseRepository {
     private val courses = mutableMapOf<Long, Course>()
 
     init {
         println(dataSource)
     }
+
     override fun insert(name: String): Long {
         val id = (courses.keys.maxOrNull() ?: 0) + 1
         courses[id] = Course(id, name)
         return id
     }
+
     override fun findById(id: Long): Course {
         return courses[id] ?: throw CourseNotFoundException(id)
     }
+
     override fun deleteById(id: Long): Course {
         return courses.remove(id) ?: throw CourseNotFoundException(id)
     }
 }
-class CourseNotFoundException(id: Long): RuntimeException("Course with and ID $id not found")
+
+class CourseNotFoundException(id: Long) : RuntimeException("Course with and ID $id not found")
 
 @Component
 class InFileCourseRepository(
@@ -54,6 +70,7 @@ class InFileCourseRepository(
             coursesFileResource.file.createNewFile()
         }
     }
+
     override fun insert(name: String): Long {
         val file = coursesFileResource.file
         val id = (file.readLines()
@@ -63,6 +80,7 @@ class InFileCourseRepository(
         file.appendText("$id,$name\n")
         return id
     }
+
     override fun findById(id: Long): Course {
         return coursesFileResource.file.readLines()
             .filter { it.isNotEmpty() }
@@ -73,6 +91,7 @@ class InFileCourseRepository(
             }
             ?: throw CourseNotFoundException(id)
     }
+
     override fun deleteById(id: Long): Course {
         val coursesLines = coursesFileResource.file.readLines()
         var lineToDelete: String? = null
@@ -101,6 +120,21 @@ data class DataSource(
     @Value("\${database.password}") val password: String
 )
 
+
+val listOfCourses: List<Course> = listOf(
+    Course(1, "spring kotlin"),
+    Course(2, "ruby on rails"),
+    Course(3, "android"),
+    Course(4, "angular"),
+    Course(5, "python"),
+    Course(6, "c++"),
+    Course(7, "c#")
+)
+
 fun main() {
-    val appConfig: ApplicationContext= AnnotationConfigApplicationContext { ApplicationConfiguration::class.java }
+    val appContext = AnnotationConfigApplicationContext(ApplicationConfiguration::class.java)
+
+    val service = appContext.getBean(CourseService::class.java)
+
+
 }

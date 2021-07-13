@@ -1,3 +1,6 @@
+package com.infinum.homework02
+
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
@@ -26,7 +29,7 @@ data class Course(
 
 @Component
 class CourseService(
-    private val repository: CourseRepository
+    @Qualifier("a") private val repository: CourseRepository
 ) {
 
     fun insertCourse(courseName: String): Long = repository.insert(courseName)
@@ -37,6 +40,7 @@ class CourseService(
 }
 
 @Component
+@Qualifier("a")
 class InMemoryCourseRepository(dataSource: DataSource) : CourseRepository {
     private val courses = mutableMapOf<Long, Course>()
 
@@ -63,10 +67,11 @@ class CourseNotFoundException(id: Long) : RuntimeException("Course with and ID $
 
 @Component
 class InFileCourseRepository(
-    @Value("\${database.name}") private val coursesFileResource: Resource // will be provided through dependency
+    @Value("\${database.name}") private val coursesFileResource: Resource// will be provided through dependency
 ) : CourseRepository {
     init {
         if (coursesFileResource.exists().not()) {
+            println("Courses file resource: ${coursesFileResource}")
             coursesFileResource.file.createNewFile()
         }
     }

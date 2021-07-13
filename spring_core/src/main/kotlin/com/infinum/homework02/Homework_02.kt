@@ -7,9 +7,15 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.PropertySource
+import org.springframework.core.io.DefaultResourceLoader
 import org.springframework.core.io.Resource
+import org.springframework.core.io.ResourceLoader
 import org.springframework.stereotype.Component
+import java.io.File
 import java.io.FileOutputStream
+import java.io.InputStream
+import java.net.URI
+import java.net.URL
 
 @Configuration
 @ComponentScan
@@ -71,7 +77,7 @@ class InFileCourseRepository(
 ) : CourseRepository {
     init {
         if (coursesFileResource.exists().not()) {
-            println("Courses file resource: ${coursesFileResource}")
+            //println("Courses file resource: ${coursesFileResource}")
             coursesFileResource.file.createNewFile()
         }
     }
@@ -121,9 +127,11 @@ class InFileCourseRepository(
 @Component
 data class DataSource(
     @Value("\${database.name}") val dbName: String,
-    @Value("\${database.username}") val username: String,
+    @Value("\${database.user}") val username: String,
     @Value("\${database.password}") val password: String
 )
+
+fun getFile(): Resource = DefaultResourceLoader().getResource("\${database.name}")
 
 
 val listOfCourses: List<Course> = listOf(
@@ -137,9 +145,27 @@ val listOfCourses: List<Course> = listOf(
 )
 
 fun main() {
+
     val appContext = AnnotationConfigApplicationContext(ApplicationConfiguration::class.java)
 
     val service = appContext.getBean(CourseService::class.java)
 
+    println("Spring kotlin id: ${service.insertCourse("spring")}, should be: 1")
+    println("Ruby id: ${service.insertCourse("ruby")}, should be: 2")
+    println("Android id: ${service.insertCourse("android")}, should be: 3")
+
+    println("Trying to find id 2, found: ${service.findCourseById(2)}, should found: ruby")
+    try {
+        service.findCourseById(5)
+    } catch (e: CourseNotFoundException) {
+        println("Tryed to found course with id 5, but exception was thrown")
+    }
+
+    println("Deleting course with id 3, deleted: ${service.deleteCourseById(3)}, should deleted: android")
+    try{
+        service.deleteCourseById(4)
+    } catch ( e: CourseNotFoundException) {
+        println("Tryed to delete course with id 4, but exception was thrown")
+    }
 
 }

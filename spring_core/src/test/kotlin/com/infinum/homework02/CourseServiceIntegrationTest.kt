@@ -1,6 +1,7 @@
 package com.infinum.homework02
 
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,14 +14,13 @@ class CourseServiceIntegrationTest @Autowired constructor(
     private val service: CourseService
 ) {
 
-    /*@BeforeEach
-    fun setUp() {
+    init {
         service.insertCourse("spring and kotlin")
         service.insertCourse("java")
         service.insertCourse("python")
         service.insertCourse("ruby")
         service.insertCourse("angular")
-    }*/
+    }
 
     @Test
     fun verifyServiceBean() {
@@ -45,11 +45,6 @@ class CourseServiceIntegrationTest @Autowired constructor(
     @Test
     fun testInsertions() {
 
-        service.insertCourse("spring and kotlin")
-        service.insertCourse("java")
-        service.insertCourse("python")
-        service.insertCourse("ruby")
-        service.insertCourse("angular")
         Assertions.assertThat(service.insertCourse("c++")).isEqualTo(6)
         Assertions.assertThat(service.insertCourse("android")).isEqualTo(7)
 
@@ -57,11 +52,7 @@ class CourseServiceIntegrationTest @Autowired constructor(
 
     @Test
     fun testDelete() {
-        service.insertCourse("spring and kotlin")
-        service.insertCourse("java")
-        service.insertCourse("python")
-        service.insertCourse("ruby")
-        service.insertCourse("angular")
+
         Assertions.assertThat(service.deleteCourseById(3)).isEqualTo(Course(3, "python"))
         Assertions.assertThat(service.deleteCourseById(4)).isEqualTo(Course(4, "ruby"))
 
@@ -69,11 +60,7 @@ class CourseServiceIntegrationTest @Autowired constructor(
 
     @Test
     fun testDeleteException() {
-        service.insertCourse("spring and kotlin")
-        service.insertCourse("java")
-        service.insertCourse("python")
-        service.insertCourse("ruby")
-        service.insertCourse("angular")
+
         Assertions.assertThatThrownBy {
             service.deleteCourseById(10)
         }.isInstanceOf(CourseNotFoundException::class.java)

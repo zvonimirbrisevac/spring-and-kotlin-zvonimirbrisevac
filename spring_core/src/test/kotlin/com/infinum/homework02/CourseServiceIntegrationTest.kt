@@ -1,6 +1,7 @@
 package com.infinum.homework02
 
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,12 +15,32 @@ class CourseServiceIntegrationTest @Autowired constructor(
     private val service: CourseService
 ) {
 
-    init {
+//    init {
+//        service.insertCourse("spring and kotlin")
+//        service.insertCourse("java")
+//        service.insertCourse("python")
+//        service.insertCourse("ruby")
+//        service.insertCourse("angular")
+//    }
+
+    @BeforeEach
+    fun setInitialState() {
         service.insertCourse("spring and kotlin")
         service.insertCourse("java")
         service.insertCourse("python")
         service.insertCourse("ruby")
         service.insertCourse("angular")
+    }
+
+    @AfterEach
+    fun cleanUp() {
+        for (i in 1..20) {
+            try {
+                service.deleteCourseById(i.toLong())
+            } catch (e: CourseNotFoundException) {
+
+            }
+        }
     }
 
     @Test

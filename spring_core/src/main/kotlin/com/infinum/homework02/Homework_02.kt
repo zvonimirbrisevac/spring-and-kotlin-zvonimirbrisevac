@@ -32,10 +32,11 @@ data class Course(
     val id: Long,
     val name: String
 )
+const val switch: String = "off"
 
 @Component
 class CourseService(
-    @Qualifier("a") private val repository: CourseRepository
+    @Qualifier(switch) private val repository: CourseRepository
 ) {
 
     fun insertCourse(courseName: String): Long = repository.insert(courseName)
@@ -46,11 +47,12 @@ class CourseService(
 }
 
 @Component
-@Qualifier("a")
+@Qualifier("on")
 class InMemoryCourseRepository(dataSource: DataSource) : CourseRepository {
     private val courses = mutableMapOf<Long, Course>()
 
     init {
+        println("InMemory repository in use.")
         println(dataSource)
     }
 
@@ -72,10 +74,12 @@ class InMemoryCourseRepository(dataSource: DataSource) : CourseRepository {
 class CourseNotFoundException(id: Long) : RuntimeException("Course with and ID $id not found")
 
 @Component
+@Qualifier("off")
 class InFileCourseRepository(
     @Value("\${database.name}") private val coursesFileResource: Resource// will be provided through dependency
 ) : CourseRepository {
     init {
+        println("InFile repository in use.")
         if (coursesFileResource.exists().not()) {
             //println("Courses file resource: ${coursesFileResource}")
             coursesFileResource.file.createNewFile()
@@ -131,7 +135,7 @@ data class DataSource(
     @Value("\${database.password}") val password: String
 )
 
-fun getFile(): Resource = DefaultResourceLoader().getResource("\${database.name}")
+
 
 
 val listOfCourses: List<Course> = listOf(

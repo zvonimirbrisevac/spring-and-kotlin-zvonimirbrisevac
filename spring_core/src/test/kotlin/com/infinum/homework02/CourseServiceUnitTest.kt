@@ -16,11 +16,7 @@ class UnitTest {
     @BeforeEach
     fun setUp() {
         service = CourseService(repository)
-        /*service.insertCourse("spring and kotlin")
-        service.insertCourse("java")
-        service.insertCourse("python")
-        service.insertCourse("ruby")
-        service.insertCourse("angular")*/
+
     }
 
     @Test
@@ -39,11 +35,6 @@ class UnitTest {
 
     @Test
     fun testMultiInsertions () {
-        /*service.insertCourse("spring and kotlin")
-        service.insertCourse("java")
-        service.insertCourse("python")
-        service.insertCourse("ruby")
-        service.insertCourse("angular")*/
         every {
             repository.insert("android")
         } returns 6

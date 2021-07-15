@@ -32,7 +32,7 @@ data class Course(
     val id: Long,
     val name: String
 )
-const val switch: String = "off"
+const val switch: String = "on"
 
 @Component
 class CourseService(

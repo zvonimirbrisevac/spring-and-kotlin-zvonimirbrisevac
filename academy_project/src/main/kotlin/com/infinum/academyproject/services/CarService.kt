@@ -14,5 +14,7 @@ class CarService(
 
     fun addCarCheckUp(checkUp: CarCheckUp) = carRepository.addCheckUp(checkUp)
 
+    fun getCarCheckUps(carId: Long) = carRepository.getCarCheckUps(carId)
+
 
 }

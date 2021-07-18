@@ -6,6 +6,7 @@ import com.infinum.academyproject.services.CarService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -33,6 +34,7 @@ class CarController (
 
     @PostMapping("/add-car")
     fun addCar(@RequestBody car : Car) : ResponseEntity<Car> {
+        println("u kontorleru za add-car je sad.")
         log.info("Adding car ${car}.")
         carService.addCar(car)
         return ResponseEntity(car, HttpStatus.OK)
@@ -45,16 +47,21 @@ class CarController (
         return ResponseEntity(carCheckUp, HttpStatus.OK)
     }
 
-    @GetMapping("/get-car-checkups")
-    fun getCarCheckUp(@RequestBody carId : Long) : ResponseEntity<List<CarCheckUp>> {
-        log.info("Fetching car check-ups for car id ${carId}.")
-        val checkUps = carService.getCarCheckUps(carId)
+    @GetMapping("/get-car-checkups/{id}")
+    fun getCarCheckUp(@PathVariable id : Long) : ResponseEntity<List<CarCheckUp>> {
+        log.info("Fetching car check-ups for car id ${id}.")
+        val checkUps = carService.getCarCheckUps(id)
         return ResponseEntity(checkUps, HttpStatus.OK)
     }
 
+    @ExceptionHandler(value = [(RuntimeException::class)])
+    fun handleException(ex:Exception): ResponseEntity<String>{
+        log.error("Error occurred", ex)
+        return ResponseEntity("Error occurred", HttpStatus.BAD_REQUEST)
+    }
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(CarController::class.java)
-
     }
+
 }

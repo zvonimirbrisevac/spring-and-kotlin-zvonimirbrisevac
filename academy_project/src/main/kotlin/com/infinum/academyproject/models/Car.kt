@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 data class Car(
     val ownerId: Long,
-    val addedDate: LocalDate,
+    val addedDate: LocalDate = LocalDate.now(),
     val manufacturer: String,
     val productionYear: Int,
     val serialNumber: String,

@@ -27,11 +27,11 @@ class CarRepository {
     }
 
     fun getCarCheckUps(carId: Long) : List<CarCheckUp> {
-        /*val carId = cars.toList()
-            .firstOrNull { pair -> pair.second == car }
-            ?.first ?: throw RuntimeException("No car in map.")
-        val list = carCheckUps.filterValues { c -> c.carId == carId }.values.toList()*/
         val car = cars[carId] ?: throw RuntimeException("No car with that id")
         return car.checkUps.sortedWith(compareBy { it.timeAndDate }).reversed()
     }
+
+    fun clearCars() = cars.clear()
+
+    fun clearCheckUps() = carCheckUps.clear()
 }

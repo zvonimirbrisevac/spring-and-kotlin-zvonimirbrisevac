@@ -17,24 +17,8 @@ class CarController (
         private val carService: CarService
 ) {
 
-    @GetMapping("/")
-    @ResponseBody
-    fun checking(): String {
-        println("u chekingu je")
-        return "Hello world"
-    }
-
-    @PostMapping("/")
-    fun checkingpost(@RequestParam data : Car): ResponseEntity<Any> {
-        println("u postu je")
-        println(data)
-        return ResponseEntity("sve dobro", HttpStatus.OK)
-    }
-
-
     @PostMapping("/add-car")
     fun addCar(@RequestBody car : Car) : ResponseEntity<Car> {
-        println("u kontorleru za add-car je sad.")
         log.info("Adding car ${car}.")
         carService.addCar(car)
         return ResponseEntity(car, HttpStatus.OK)

@@ -23,6 +23,10 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("com.ninja-squad:springmockk:3.0.1")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.7.2")
+	testImplementation("org.assertj:assertj-core:3.20.2")
+	testImplementation("io.mockk:mockk:1.12.0")
 }
 
 tasks.withType<KotlinCompile> {

@@ -12,9 +12,12 @@ class CarService(
 
     fun addCar(car: Car): Long = carRepository.addCar(car)
 
-    fun addCarCheckUp(checkUp: CarCheckUp) = carRepository.addCheckUp(checkUp)
+    fun addCarCheckUp(checkUp: CarCheckUp) : Long = carRepository.addCheckUp(checkUp)
 
-    fun getCarCheckUps(carId: Long) = carRepository.getCarCheckUps(carId)
+    fun getCarCheckUps(carId: Long) : List<CarCheckUp> = carRepository.getCarCheckUps(carId)
 
+    fun deleteAllCars() = carRepository.clearCars()
+
+    fun deleteAllCarCheckUps() = carRepository.clearCheckUps()
 
 }

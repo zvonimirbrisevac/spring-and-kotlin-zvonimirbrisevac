@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 
 @Controller
 class CarController (
-        private val carService: CarService
+    private val carService: CarService
 ) {
 
     @PostMapping("/add-car")

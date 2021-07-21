@@ -2,6 +2,7 @@ package com.infinum.academyproject.repositories
 
 import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
+import org.springframework.format.datetime.DateFormatter
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
@@ -13,23 +14,25 @@ import java.time.format.DateTimeFormatter
 class CarRepository (
     private val jdbcTemplate: NamedParameterJdbcTemplate
 ) {
+    val dateTimeformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    val dateFormatter  = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     fun addCar(car: Car): Long? {
         jdbcTemplate.update(
             "INSERT INTO cars (addeddate, manufacturer, productionyear, serialnumber)" +
                     "VALUES (:date, :manuf, :prodyear, :sernum)",
-            mapOf("date" to car.addedDate.toString(),
+            mapOf("date" to dateFormatter.format(car.addedDate),
                 "manuf" to car.manufacturer,
                 "prodyear" to car.productionYear,
                 "sernum" to car.serialNumber)
         )
 
         return jdbcTemplate.queryForObject(
-            "SELECT id FROM cars WHERE addeddate = :date AND" +
-                    "manufacturer = :manuf AND" +
-                    "productionyear = :prodyear AND" +
+            "SELECT id FROM cars WHERE addeddate = :date AND " +
+                    "manufacturer = :manuf AND " +
+                    "productionyear = :prodyear AND " +
                     "serialnumber = :sernum LIMIT 1",
-            mapOf("date" to car.addedDate.toString(),
+            mapOf("date" to dateFormatter.format(car.addedDate),
                 "manuf" to car.manufacturer,
                 "prodyear" to car.productionYear,
                 "sernum" to car.serialNumber
@@ -38,11 +41,19 @@ class CarRepository (
     }
 
     fun addCheckUp(checkUp: CarCheckUp): Long? {
+        val count = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM cars WHERE id = :id",
+            mapOf("id" to checkUp.carId),
+            Int::class.java
+        )
+
+        if (count == 0) throw RuntimeException("No car with that id")
+
         jdbcTemplate.update(
             "INSERT INTO checkups (timeanddate, workername, price, carid)" +
                     "VALUES (:time, :worker, :price, :carid)",
             mapOf(
-                "time" to checkUp.timeAndDate.toString(),
+                "time" to dateTimeformatter.format(checkUp.timeAndDate),
                 "worker" to checkUp.workerName,
                 "price" to checkUp.price,
                 "carid" to checkUp.carId
@@ -50,12 +61,12 @@ class CarRepository (
         )
 
         return jdbcTemplate.queryForObject(
-            "SELECT id FROM checkups WHERE timeanddate = :time AND" +
-                    "workername = :worker AND" +
-                    "price = :price AND" +
+            "SELECT id FROM checkups WHERE timeanddate = :time AND " +
+                    "workername = :worker AND " +
+                    "price = :price AND " +
                     "carid = :carid LIMIT 1",
             mapOf(
-                "time" to checkUp.timeAndDate.toString(),
+                "time" to dateTimeformatter.format(checkUp.timeAndDate),
                 "worker" to checkUp.workerName,
                 "price" to checkUp.price,
                 "carid" to checkUp.carId
@@ -65,17 +76,24 @@ class CarRepository (
 
 
     fun getCarCheckUps(carId: Long) : List<CarCheckUp>? {
+        val count = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM cars WHERE id = :id",
+            mapOf("id" to carId),
+            Int::class.java
+        )
+
+        if (count == 0) throw RuntimeException("No car with that id")
+
         val results: MutableList<MutableMap<String, Any>> =
             jdbcTemplate.queryForList(
                 "SELECT * FROM checkups WHERE carid = :id",
                 mapOf("id" to carId)
             )
         var returnList: MutableList<CarCheckUp> = mutableListOf()
-        val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
         for (map in results) {
             returnList.add(CarCheckUp(
-                LocalDateTime.parse(map["timeanddate"].toString(), format),
+                LocalDateTime.parse(map["timeanddate"].toString(), dateTimeformatter),
                 map["workername"].toString(),
                 map["price"].toString().toDouble(),
                 map["carid"].toString().toLong()

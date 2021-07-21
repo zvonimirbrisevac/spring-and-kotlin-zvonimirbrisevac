@@ -38,7 +38,7 @@ class CarController (
         return ResponseEntity(checkUps, HttpStatus.OK)
     }
 
-    @ExceptionHandler(value = [(RuntimeException::class)])
+    @ExceptionHandler(value = [(Exception::class)])
     fun handleException(ex:Exception): ResponseEntity<String>{
         log.error("Error occurred", ex)
         return ResponseEntity("Error occurred", HttpStatus.BAD_REQUEST)

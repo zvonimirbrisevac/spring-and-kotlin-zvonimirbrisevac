@@ -21,7 +21,7 @@ class CarRepository (
         jdbcTemplate.update(
             "INSERT INTO cars (addeddate, manufacturer, productionyear, serialnumber)" +
                     "VALUES (:date, :manuf, :prodyear, :sernum)",
-            mapOf("date" to dateFormatter.format(car.addedDate),
+            mapOf("date" to car.addedDate,
                 "manuf" to car.manufacturer,
                 "prodyear" to car.productionYear,
                 "sernum" to car.serialNumber)
@@ -32,7 +32,7 @@ class CarRepository (
                     "manufacturer = :manuf AND " +
                     "productionyear = :prodyear AND " +
                     "serialnumber = :sernum LIMIT 1",
-            mapOf("date" to dateFormatter.format(car.addedDate),
+            mapOf("date" to car.addedDate,
                 "manuf" to car.manufacturer,
                 "prodyear" to car.productionYear,
                 "sernum" to car.serialNumber
@@ -53,7 +53,7 @@ class CarRepository (
             "INSERT INTO checkups (timeanddate, workername, price, carid)" +
                     "VALUES (:time, :worker, :price, :carid)",
             mapOf(
-                "time" to dateTimeformatter.format(checkUp.timeAndDate),
+                "time" to checkUp.timeAndDate,
                 "worker" to checkUp.workerName,
                 "price" to checkUp.price,
                 "carid" to checkUp.carId
@@ -66,7 +66,7 @@ class CarRepository (
                     "price = :price AND " +
                     "carid = :carid LIMIT 1",
             mapOf(
-                "time" to dateTimeformatter.format(checkUp.timeAndDate),
+                "time" to checkUp.timeAndDate,
                 "worker" to checkUp.workerName,
                 "price" to checkUp.price,
                 "carid" to checkUp.carId
@@ -86,21 +86,22 @@ class CarRepository (
 
         val results: MutableList<MutableMap<String, Any>> =
             jdbcTemplate.queryForList(
-                "SELECT * FROM checkups WHERE carid = :id",
+                "SELECT * FROM checkups WHERE carid = :id ORDER BY timeanddate DESC",
                 mapOf("id" to carId)
             )
         var returnList: MutableList<CarCheckUp> = mutableListOf()
 
         for (map in results) {
             returnList.add(CarCheckUp(
-                LocalDateTime.parse(map["timeanddate"].toString(), dateTimeformatter),
+                LocalDateTime.parse(map["timeanddate"].toString().subSequence(0, map["timeanddate"].toString()
+                    .lastIndexOf(":")), dateTimeformatter),
                 map["workername"].toString(),
                 map["price"].toString().toDouble(),
                 map["carid"].toString().toLong()
             ))
         }
 
-        return returnList.sortedWith(compareBy { it.timeAndDate }).reversed()
+        return returnList
     }
 
     /*fun clearCars() = cars.clear()

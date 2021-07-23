@@ -50,6 +50,10 @@ class JdbcTest {
 
     @BeforeEach
     fun setUp() {
+
+        jdbcTemplate.update("ALTER SEQUENCE cars_id_seq RESTART WITH 1", mapOf("" to ""))
+        jdbcTemplate.update("ALTER SEQUENCE checkups_id_seq RESTART WITH 1", mapOf("" to ""))
+
         for (i in 0..4) {
             jdbcTemplate.update(
                 "INSERT INTO cars (addeddate, manufacturer, productionyear, serialnumber) " +
@@ -95,8 +99,10 @@ class JdbcTest {
 
     @AfterEach
     fun breakDown() {
-        jdbcTemplate.update("DELETE FROM cars", mapOf("" to ""))
-        jdbcTemplate.update("DELETE FROM checkups", mapOf("" to ""))
+         ///jdbcTemplate.update("DELETE FROM cars", mapOf("" to ""))
+        // jdbcTemplate.update("DELETE FROM checkups", mapOf("" to ""))
+        jdbcTemplate.update("ALTER SEQUENCE cars_id_seq RESTART WITH 1", mapOf("" to ""))
+        jdbcTemplate.update("ALTER SEQUENCE checkups_id_seq RESTART WITH 1", mapOf("" to ""))
     }
 
     @Test

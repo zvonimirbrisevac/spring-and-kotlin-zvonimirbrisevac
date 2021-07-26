@@ -12,10 +12,11 @@ data class CarCheckUpDTO(
     val timeAndDate: LocalDateTime,
     val workerName: String,
     val price: Double,
-    val car: CarDTO
+    // val car: CarDTO
+
 ) {
-    constructor(checkUp : CarCheckUp ) : this(checkUp.id, checkUp.timeAndDate, checkUp.workerName,
-    checkUp.price, CarDTO(checkUp.car))
+    // constructor(checkUp : CarCheckUp ) : this(checkUp.id, checkUp.timeAndDate, checkUp.workerName,
+    // checkUp.price, CarDTO(checkUp.car))
 
     fun toCarCheckUp() : CarCheckUp = CarCheckUp(0, timeAndDate, workerName, price, car.toCar())
 }

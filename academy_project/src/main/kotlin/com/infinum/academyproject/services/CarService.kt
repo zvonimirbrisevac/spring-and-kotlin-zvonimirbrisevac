@@ -24,7 +24,7 @@ class CarService(
             val checkUps = checkUpRepository.findByCar(it)
             CarWithCheckUpsDTO(it, checkUps)
         }
-            ?: throw IllegalArgumentException("No director with such id: $id")
+            ?: throw IllegalArgumentException("No car with such id: $id")
     }
 
     // fun deleteAllCars() = carRepository.clearCars()

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import javax.persistence.*
 
 @Entity
-@Table(name = "car")
+@Table(name = "cars")
 data class Car(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CAR_SEQ")

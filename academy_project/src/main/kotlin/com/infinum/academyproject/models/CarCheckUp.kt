@@ -6,7 +6,7 @@ import javax.persistence.*
 import kotlin.time.measureTimedValue
 
 @Entity
-@Table(name = "checkup")
+@Table(name = "checkups")
 data class CarCheckUp(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CHECKUP_SEQ")
@@ -18,6 +18,7 @@ data class CarCheckUp(
     val workerName: String,
     val price: Double,
 
-    @ManyToOne
+    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    @JoinColumn(name = "car_id")
     val car: Car
 )

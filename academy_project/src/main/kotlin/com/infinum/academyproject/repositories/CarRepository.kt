@@ -19,9 +19,10 @@ class CarRepository (
 
     fun addCar(car: Car): Long? {
         jdbcTemplate.update(
-            "INSERT INTO cars (addeddate, manufacturer, productionyear, serialnumber)" +
-                    "VALUES (:date, :manuf, :prodyear, :sernum)",
-            mapOf("date" to car.addedDate,
+            "INSERT INTO cars (ownerid, addeddate, manufacturer, productionyear, serialnumber)" +
+                    "VALUES (:ownerid, :date, :manuf, :prodyear, :sernum)",
+            mapOf("ownerid" to car.ownerId,
+                "date" to car.addedDate,
                 "manuf" to car.manufacturer,
                 "prodyear" to car.productionYear,
                 "sernum" to car.serialNumber)

@@ -50,6 +50,9 @@ class JdbcTest {
 
     @BeforeEach
     fun setUp() {
+        jdbcTemplate.update("ALTER SEQUENCE cars_id_seq RESTART WITH 1", mapOf("" to ""))
+        jdbcTemplate.update("ALTER SEQUENCE checkups_id_seq RESTART WITH 1", mapOf("" to ""))
+
         for (i in 0..4) {
             jdbcTemplate.update(
                 "INSERT INTO cars (addeddate, manufacturer, productionyear, serialnumber) " +
@@ -156,6 +159,45 @@ class JdbcTest {
         }
 
         Assertions.assertThat(resultsList).isEqualTo(mutableListOf<Double>(4230.00, 3000.00, 2150.00, 2000.00, 1000.00 ))
+    }
+
+    @Test
+    fun getCheckUpByPriceAndName() {
+        Assertions.assertThat(
+            jdbcTemplate.queryForObject(
+                "SELECT timeanddate FROM checkups WHERE workername = :name AND price = 500.00",
+                mapOf("name" to "mijo"),
+                LocalDateTime::class.java
+            )
+        ).isEqualTo(LocalDateTime.parse("2010-03-15 12:15", dateTimeFormatter))
+
+    }
+
+    @Test
+    fun getManufacturerAscByProdYear() {
+        val results: MutableList<MutableMap<String, Any>> =
+            jdbcTemplate.queryForList(
+                "SELECT manufacturer FROM cars WHERE cars.productionyear >= 2005 ORDER BY productionyear ASC",
+                mapOf("" to "")
+            )
+        var resultsList: MutableList<String> = mutableListOf()
+
+        for (map in results) {
+            resultsList.add(map["manufacturer"].toString())
+        }
+
+        Assertions.assertThat(resultsList).isEqualTo(mutableListOf<String>("citroen", "honda", "opel"))
+    }
+
+    @Test
+    fun getEmptyListCheckUps() {
+        val count = jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM cars INNER JOIN checkups ON cars.id = checkups.carid WHERE cars.id = 5",
+            mapOf("" to ""),
+            Int::class.java
+        )
+
+        Assertions.assertThat(count).isEqualTo(0)
     }
 
 

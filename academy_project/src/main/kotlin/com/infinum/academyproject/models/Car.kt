@@ -9,6 +9,7 @@ data class Car(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CAR_SEQ")
     @SequenceGenerator(name = "CAR_SEQ", sequenceName = "CAR_SEQ", allocationSize = 1)
+    @JoinColumn(name = "id")
     val id: Long = 0,
 
     val ownerId: Long,

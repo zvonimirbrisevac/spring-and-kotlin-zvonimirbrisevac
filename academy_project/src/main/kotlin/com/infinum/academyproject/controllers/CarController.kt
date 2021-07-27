@@ -7,13 +7,13 @@ import com.infinum.academyproject.services.CarService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
-import java.awt.print.Pageable
 
 @Controller
 class CarController (
@@ -41,14 +41,15 @@ class CarController (
         return ResponseEntity(checkUps, HttpStatus.OK)
     }
 
-    /*@GetMapping("/all-cars-paged")
-    fun getCarsPaged(pageable: Pageable): Page<Car> {
+    @GetMapping("/all-cars-paged")
+    fun getCarsPaged(pageable: Pageable): ResponseEntity<Page<CarDTO>> {
         log.info("Fetching one car page.")
-
+        val page = carService.getCarsPaged(pageable)
+        return ResponseEntity(page, HttpStatus.OK)
     }
 
-    @GetMapping("/get-car-checkup-paged/{id}")
-    fun getCheckUpsPaged(pageable: Pageable, @PathVariable id: Long) : Page<List<CarCheckUp>> {
+    /*@GetMapping("/get-car-checkup-paged/{id}")
+    fun getCheckUpsPaged(pageable: Pageable, @PathVariable id: Long) : ResponseEntity<Page<List<CarCheckUp>>> {
         log.info("Fetching check up page.")
 
     }*/

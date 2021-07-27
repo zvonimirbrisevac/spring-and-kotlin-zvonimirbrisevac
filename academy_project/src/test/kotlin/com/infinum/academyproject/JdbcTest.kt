@@ -37,15 +37,15 @@ class JdbcTest {
     )
 
     val carsCheckUps = listOf(
-        CarCheckUp(LocalDateTime.parse("2015-06-07 14:00", dateTimeFormatter), "mijo", 250.00, 1),
-        CarCheckUp(LocalDateTime.parse("2016-11-30 08:00", dateTimeFormatter), "pero", 1000.00, 1),
-        CarCheckUp(LocalDateTime.parse("2017-02-05 12:45", dateTimeFormatter), "ivo", 2000.00, 1),
-        CarCheckUp(LocalDateTime.parse("2007-03-03 13:00", dateTimeFormatter), "matej", 2150.00, 2),
-        CarCheckUp(LocalDateTime.parse("2010-03-15 12:15", dateTimeFormatter), "mijo", 500.00, 2),
-        CarCheckUp(LocalDateTime.parse("2015-08-09 13:00", dateTimeFormatter), "jura", 750.00, 3),
-        CarCheckUp(LocalDateTime.parse("2018-12-09 12:45", dateTimeFormatter), "drago", 3000.00, 3),
-        CarCheckUp(LocalDateTime.parse("2013-10-01 14:50", dateTimeFormatter), "blaz", 4230.00, 3),
-        CarCheckUp(LocalDateTime.parse("2014-04-25 09:35", dateTimeFormatter), "pejo", 210.00, 4)
+        CarCheckUp(0, LocalDateTime.parse("2015-06-07 14:00", dateTimeFormatter), "mijo", 250.00, 1),
+        CarCheckUp(0, LocalDateTime.parse("2016-11-30 08:00", dateTimeFormatter), "pero", 1000.00, 1),
+        CarCheckUp(0, LocalDateTime.parse("2017-02-05 12:45", dateTimeFormatter), "ivo", 2000.00, 1),
+        CarCheckUp(0, LocalDateTime.parse("2007-03-03 13:00", dateTimeFormatter), "matej", 2150.00, 2),
+        CarCheckUp(0, LocalDateTime.parse("2010-03-15 12:15", dateTimeFormatter), "mijo", 500.00, 2),
+        CarCheckUp(0, LocalDateTime.parse("2015-08-09 13:00", dateTimeFormatter), "jura", 750.00, 3),
+        CarCheckUp(0, LocalDateTime.parse("2018-12-09 12:45", dateTimeFormatter), "drago", 3000.00, 3),
+        CarCheckUp(0, LocalDateTime.parse("2013-10-01 14:50", dateTimeFormatter), "blaz", 4230.00, 3),
+        CarCheckUp(0, LocalDateTime.parse("2014-04-25 09:35", dateTimeFormatter), "pejo", 210.00, 4)
     )
 
     @BeforeEach

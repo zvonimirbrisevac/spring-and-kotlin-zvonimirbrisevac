@@ -5,6 +5,8 @@ import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.repositories.CarRepository
 import com.infinum.academyproject.repositories.CheckUpRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,6 +28,10 @@ class CarService(
         }
             ?: throw IllegalArgumentException("No car with such id: $id")
     }
+
+    fun getCarsPaged(pageable: Pageable) : Page<CarDTO> = carRepository.findAll(pageable).map { CarDTO(it) }
+
+    fun getCheckUpsPaged(pageable: Pageable) : Page<CarCheckUpDTO> = checkUpRepository.findAll(pageable).map { CarCheckUpDTO(it) }
 
     // fun deleteAllCars() = carRepository.clearCars()
 

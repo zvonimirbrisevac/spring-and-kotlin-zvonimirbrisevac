@@ -18,7 +18,7 @@ data class CarCheckUp(
     val workerName: String,
     val price: Double,
 
-    @ManyToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
-    @JoinColumn(name = "car_id")
+    @ManyToOne(cascade = arrayOf(CascadeType.PERSIST),fetch = FetchType.LAZY)
+    @JoinColumn(referencedColumnName = "id")
     val car: Car
 )

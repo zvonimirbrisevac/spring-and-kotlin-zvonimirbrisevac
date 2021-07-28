@@ -1,0 +1,21 @@
+version: "3"
+
+# docker run --rm --name courses-database -v courses-data:/var/lib/postgresql/data -p 5432:5432
+# -e POSTGRES_PASSWORD=admin -e POSTGRES_DB=courses-db -d postgres:13-alpine
+# psql -h localhost -p 5433 -d cars-db  -U admin
+
+# create table if not exists checkups (id bigserial primary key, timeAndDate varchar(25), workerName varchar(25), price decimal(8,2), carId bigint);
+# create table if not exists cars (id bigserial primary key, addedDate varchar(15), manufacturer varchar(25), productionYear integer, serialNumber varchar(20));
+services:
+  cars-database-4dz:
+    image: "postgres:13-alpine"
+    ports:
+      - "5434:5432"
+    volumes:
+      - "cars-db-data4dz:/var/lib/postgresql/data"
+    environment:
+      - "POSTGRES_USER=admin"
+      - "POSTGRES_PASSWORD=admin"
+      - "POSTGRES_DB=cars-db"
+volumes:
+  cars-db-data4dz:

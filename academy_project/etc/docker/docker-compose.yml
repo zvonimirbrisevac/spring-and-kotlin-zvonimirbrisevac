@@ -7,15 +7,15 @@ version: "3"
 # create table if not exists checkups (id bigserial primary key, timeAndDate varchar(25), workerName varchar(25), price decimal(8,2), carId bigint);
 # create table if not exists cars (id bigserial primary key, addedDate varchar(15), manufacturer varchar(25), productionYear integer, serialNumber varchar(20));
 services:
-  cars-database:
+  cars-database-4dz:
     image: "postgres:13-alpine"
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
-      - "cars-db-data:/var/lib/postgresql/data"
+      - "cars-db-data4dz:/var/lib/postgresql/data"
     environment:
       - "POSTGRES_USER=admin"
       - "POSTGRES_PASSWORD=admin"
       - "POSTGRES_DB=cars-db"
 volumes:
-  cars-db-data:
+  cars-db-data4dz:

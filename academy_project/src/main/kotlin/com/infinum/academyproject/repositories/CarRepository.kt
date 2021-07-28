@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
 import java.lang.RuntimeException
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -17,8 +18,9 @@ class CarRepository (
     val dateTimeformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val dateFormatter  = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
-    fun addCar(car: Car): Long? {
-        jdbcTemplate.update(
+    fun addCar(car: Car): Long {
+
+        val id : Long = jdbcTemplate.update(
             "INSERT INTO cars (ownerid, addeddate, manufacturer, productionyear, serialnumber)" +
                     "VALUES (:ownerid, :date, :manuf, :prodyear, :sernum)",
             mapOf("ownerid" to car.ownerId,
@@ -26,19 +28,9 @@ class CarRepository (
                 "manuf" to car.manufacturer,
                 "prodyear" to car.productionYear,
                 "sernum" to car.serialNumber)
-        )
+        ).toLong()
 
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM cars WHERE addeddate = :date AND " +
-                    "manufacturer = :manuf AND " +
-                    "productionyear = :prodyear AND " +
-                    "serialnumber = :sernum LIMIT 1",
-            mapOf("date" to car.addedDate,
-                "manuf" to car.manufacturer,
-                "prodyear" to car.productionYear,
-                "sernum" to car.serialNumber
-            ), Long::class.java
-        )
+        return id
     }
 
     fun addCheckUp(checkUp: CarCheckUp): Long? {
@@ -50,7 +42,7 @@ class CarRepository (
 
         if (count == 0) throw RuntimeException("No car with that id")
 
-        jdbcTemplate.update(
+        val id : Long = jdbcTemplate.update(
             "INSERT INTO checkups (timeanddate, workername, price, carid)" +
                     "VALUES (:time, :worker, :price, :carid)",
             mapOf(
@@ -59,20 +51,27 @@ class CarRepository (
                 "price" to checkUp.price,
                 "carid" to checkUp.carId
             )
-        )
+        ).toLong()
 
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM checkups WHERE timeanddate = :time AND " +
-                    "workername = :worker AND " +
-                    "price = :price AND " +
-                    "carid = :carid LIMIT 1",
-            mapOf(
-                "time" to checkUp.timeAndDate,
-                "worker" to checkUp.workerName,
-                "price" to checkUp.price,
-                "carid" to checkUp.carId
-            ), Long::class.java
-        )
+        return id
+    }
+
+    fun getCarById(carId: Long) : Car? {
+        val car : Car =  jdbcTemplate.queryForObject(
+            "SELECT ownerid, addeddate, manufacturer, productionyear, serialnumber FROM cars WHERE id = :id",
+            mapOf("id" to carId),
+        ) {row, _ ->
+            Car (ownerId = row.getLong("ownerid"),
+                //addedDate = LocalDateTime.parse(row.getString("addeddate").toString().subSequence(
+                    //0, row.getString("addeddate").lastIndexOf(":")), dateTimeformatter),
+                addedDate = LocalDate.parse(row.getString("addeddate"), dateFormatter),
+                manufacturer = row.getString("manufacturer"),
+                productionYear = row.getInt("productionyear"),
+                serialNumber = row.getString("serialnumber"))
+
+        } ?: throw RuntimeException("No car with such id.")
+
+        return car
     }
 
 

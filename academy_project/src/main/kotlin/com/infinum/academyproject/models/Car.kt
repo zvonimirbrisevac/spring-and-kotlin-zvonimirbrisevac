@@ -8,5 +8,5 @@ data class Car(
     val manufacturer: String,
     val productionYear: Int,
     val serialNumber: String,
-    var checkUps: MutableList<CarCheckUp> = mutableListOf<CarCheckUp>()
+    var checkUps: List<CarCheckUp> = listOf<CarCheckUp>()
 )

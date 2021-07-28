@@ -210,20 +210,18 @@ class AcademyProjectApplicationTests {
         mvc.get("/get-car-checkups/3")
             .andExpect {
                 status { is2xxSuccessful() }
-                jsonPath("$[0].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 12:00", format))) }
-                jsonPath("$[0].workerName") { value("marko") }
-                jsonPath("$[0].price") { value(2000.00) }
-                jsonPath("$[0].carId") { value(3) }
-
-                jsonPath("$[1].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 11:00", format))) }
-                jsonPath("$[1].workerName") { value("ivica") }
-                jsonPath("$[1].price") { value(200.00) }
-                jsonPath("$[1].carId") { value(3) }
-
-                jsonPath("$[2].timeAndDate") { value(format.format(LocalDateTime.parse("2020-08-20 09:30", format))) }
-                jsonPath("$[2].workerName") { value("pero") }
-                jsonPath("$[2].price") { value(1000.00) }
-                jsonPath("$[2].carId") { value(3) }
+                jsonPath("$.checkUps[0].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 12:00", format))) }
+                jsonPath("$.checkUps[0].workerName") { value("marko") }
+                jsonPath("$.checkUps[0].price") { value(2000.00) }
+                jsonPath("$.checkUps[0].carId") { value(3) }
+                jsonPath("$.checkUps[1].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 11:00", format))) }
+                jsonPath("$.checkUps[1].workerName") { value("ivica") }
+                jsonPath("$.checkUps[1].price") { value(200.00) }
+                jsonPath("$.checkUps[1].carId") { value(3) }
+                jsonPath("$.checkUps[2].timeAndDate") { value(format.format(LocalDateTime.parse("2020-08-20 09:30", format))) }
+                jsonPath("$.checkUps[2].workerName") { value("pero") }
+                jsonPath("$.checkUps[2].price") { value(1000.00) }
+                jsonPath("$.checkUps[2].carId") { value(3) }
             }
 
     }

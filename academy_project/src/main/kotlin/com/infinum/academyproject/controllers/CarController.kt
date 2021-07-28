@@ -32,10 +32,10 @@ class CarController (
     }
 
     @GetMapping("/get-car-checkups/{id}")
-    fun getCarCheckUp(@PathVariable id : Long) : ResponseEntity<List<CarCheckUp>> {
+    fun getCarCheckUp(@PathVariable id : Long) : ResponseEntity<Car> {
         log.info("Fetching car check-ups for car id ${id}.")
-        val checkUps = carService.getCarCheckUps(id)
-        return ResponseEntity(checkUps, HttpStatus.OK)
+        val carWithCheckUps = carService.getCarCheckUps(id)
+        return ResponseEntity(carWithCheckUps, HttpStatus.OK)
     }
 
     @ExceptionHandler(value = [(Exception::class)])

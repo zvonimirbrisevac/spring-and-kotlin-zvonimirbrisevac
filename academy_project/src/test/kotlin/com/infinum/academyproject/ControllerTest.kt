@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.services.CarService
+import org.hamcrest.Matchers
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -31,14 +32,6 @@ class ControllerTest @Autowired constructor(
 
     val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
-    val cars = listOf(
-        Car(ownerId = 111, manufacturer = "opel", productionYear = 2015, serialNumber = "12345"),
-        Car(ownerId = 222, manufacturer = "honda", productionYear = 2010, serialNumber = "10101"),
-        Car(ownerId = 333, manufacturer = "kia", productionYear = 2000, serialNumber = "55555"),
-        Car(ownerId = 444, manufacturer = "vw", productionYear = 1998, serialNumber = "44444"),
-        Car(ownerId = 555, manufacturer = "citroen", productionYear = 2005, serialNumber = "98765")
-    )
-
     val carsCheckUps = listOf(
         CarCheckUp(LocalDateTime.parse("2015-06-07 14:00", format), "mijo", 250.00, 1),
         CarCheckUp(LocalDateTime.parse("2016-11-30 08:00", format), "pero", 1000.00, 1),
@@ -51,30 +44,50 @@ class ControllerTest @Autowired constructor(
         CarCheckUp(LocalDateTime.parse("2014-04-25 09:35", format), "pejo", 210.00, 4)
     )
 
+    val cars = listOf(
+        Car(
+            ownerId = 111, manufacturer = "opel", productionYear = 2015, serialNumber = "12345",
+            checkUps = listOf(carsCheckUps[2], carsCheckUps[1], carsCheckUps[0])
+        ),
+        Car(
+            ownerId = 222, manufacturer = "honda", productionYear = 2010, serialNumber = "10101",
+            checkUps = listOf(carsCheckUps[3], carsCheckUps[4])
+        ),
+        Car(
+            ownerId = 333, manufacturer = "kia", productionYear = 2000, serialNumber = "55555",
+            checkUps = listOf(carsCheckUps[6], carsCheckUps[5], carsCheckUps[7])
+        ),
+        Car(
+            ownerId = 444, manufacturer = "vw", productionYear = 1998, serialNumber = "44444",
+            checkUps = listOf(carsCheckUps[8])
+        ),
+        Car(ownerId = 555, manufacturer = "citroen", productionYear = 2005, serialNumber = "98765")
+    )
+
+
     @BeforeEach
     fun setUp() {
 
         for (i in 0..4) {
             Mockito.`when`(service.addCar(cars[i])).thenReturn((i + 1).toLong())
+            Mockito.`when`(
+                service.getCarCheckUps((i + 1).toLong())
+            ).thenReturn(cars[i])
+
         }
 
         for (i in 0..8) {
             Mockito.`when`(service.addCarCheckUp(carsCheckUps[i])).thenReturn((i + 1).toLong())
         }
 
-        Mockito.`when`(service.getCarCheckUps(1))
-            .thenReturn(mutableListOf(carsCheckUps[2], carsCheckUps[1], carsCheckUps[0]))
-        Mockito.`when`(service.getCarCheckUps(2))
-            .thenReturn(mutableListOf(carsCheckUps[4], carsCheckUps[3]))
-        Mockito.`when`(service.getCarCheckUps(3))
-            .thenReturn(mutableListOf(carsCheckUps[6], carsCheckUps[5], carsCheckUps[7]))
-        Mockito.`when`(service.getCarCheckUps(4))
-            .thenReturn(mutableListOf(carsCheckUps[8]))
-        Mockito.`when`(service.getCarCheckUps(5))
-            .thenReturn(mutableListOf())
         Mockito.`when`(service.getCarCheckUps(777)).thenThrow(RuntimeException::class.java)
-        Mockito.`when`(service.addCarCheckUp(CarCheckUp(
-            LocalDateTime.parse("2020-02-02 01:33", format), "david", 20.00, 100)))
+        Mockito.`when`(
+            service.addCarCheckUp(
+                CarCheckUp(
+                    LocalDateTime.parse("2020-02-02 01:33", format), "david", 20.00, 100
+                )
+            )
+        )
             .thenThrow(RuntimeException::class.java)
     }
 
@@ -87,9 +100,11 @@ class ControllerTest @Autowired constructor(
     @Test
     fun storeSimpleCar() {
         mvc.post("/add-car") {
-            content = objectMapper.writeValueAsString(Car(
-                ownerId = 1234, manufacturer = "bmw", productionYear = 2012, serialNumber = "102030"
-            ))
+            content = objectMapper.writeValueAsString(
+                Car(
+                    ownerId = 1234, manufacturer = "bmw", productionYear = 2012, serialNumber = "102030"
+                )
+            )
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
@@ -98,15 +113,18 @@ class ControllerTest @Autowired constructor(
             jsonPath("$.manufacturer") { value("bmw") }
             jsonPath("$.productionYear") { value(2012) }
             jsonPath("$.serialNumber") { value("102030") }
-            jsonPath("$.checkUps") { value(mutableListOf<CarCheckUp>()) }
+            //jsonPath("$.checkUps") { value(mutableListOf<CarCheckUp>()) }
         }
     }
 
     @Test
     fun storeSimpleCheckUp() {
         mvc.post("/add-car-checkup") {
-            content = objectMapper.writeValueAsString(CarCheckUp(
-                LocalDateTime.parse("2012-05-21 12:00", format), "miro", 100.00, 1))
+            content = objectMapper.writeValueAsString(
+                CarCheckUp(
+                    LocalDateTime.parse("2012-05-21 12:00", format), "miro", 100.00, 1
+                )
+            )
             contentType = MediaType.APPLICATION_JSON
 
         }.andExpect {
@@ -136,20 +154,22 @@ class ControllerTest @Autowired constructor(
         mvc.get("/get-car-checkups/3")
             .andExpect {
                 status { is2xxSuccessful() }
-                jsonPath("$[0].timeAndDate") { value(format.format(LocalDateTime.parse("2018-12-09 12:45", format))) }
-                jsonPath("$[0].workerName") { value("drago") }
-                jsonPath("$[0].price") { value(3000.00) }
-                jsonPath("$[0].carId") { value(3) }
+                //Matchers.containsInAnyOrder()
+                //jsonPath("$checkUps[0].time")
+                jsonPath("$.checkUps[0].timeAndDate") { value(format.format(LocalDateTime.parse("2018-12-09 12:45", format))) }
+                jsonPath("$.checkUps[0].workerName") { value("drago") }
+                jsonPath("$.checkUps[0].price") { value(3000.00) }
+                jsonPath("$.checkUps[0].carId") { value(3) }
 
-                jsonPath("$[1].timeAndDate") { value(format.format(LocalDateTime.parse("2015-08-09 13:00", format))) }
-                jsonPath("$[1].workerName") { value("jura") }
-                jsonPath("$[1].price") { value(750.00) }
-                jsonPath("$[1].carId") { value(3) }
+                jsonPath("$.checkUps[1].timeAndDate") { value(format.format(LocalDateTime.parse("2015-08-09 13:00", format))) }
+                jsonPath("$.checkUps[1].workerName") { value("jura") }
+                jsonPath("$.checkUps[1].price") { value(750.00) }
+                jsonPath("$.checkUps[1].carId") { value(3) }
 
-                jsonPath("$[2].timeAndDate") { value(format.format(LocalDateTime.parse("2013-10-01 14:50", format))) }
-                jsonPath("$[2].workerName") { value("blaz") }
-                jsonPath("$[2].price") { value(4230.00) }
-                jsonPath("$[2].carId") { value(3) }
+                jsonPath("$.checkUps[2].timeAndDate") { value(format.format(LocalDateTime.parse("2013-10-01 14:50", format))) }
+                jsonPath("$.checkUps[2].workerName") { value("blaz") }
+                jsonPath("$.checkUps[2].price") { value(4230.00) }
+                jsonPath("$.checkUps[2].carId") { value(3) }
             }
     }
 
@@ -166,19 +186,24 @@ class ControllerTest @Autowired constructor(
         mvc.get("/get-car-checkups/4")
             .andExpect {
                 status { is2xxSuccessful() }
-                jsonPath("$[0].timeAndDate") { value(format.format(LocalDateTime.parse("2014-04-25 09:35", format))) }
-                jsonPath("$[0].workerName") { value("pejo") }
-                jsonPath("$[0].price") { value(210.00) }
-                jsonPath("$[0].carId") { value(4) }
+                jsonPath("$.checkUps[0].timeAndDate") { value(format.format(LocalDateTime.parse("2014-04-25 09:35", format))) }
+                jsonPath("$.checkUps[0].workerName") { value("pejo") }
+                jsonPath("$.checkUps[0].price") { value(210.00) }
+                jsonPath("$.checkUps[0].carId") { value(4) }
             }
     }
 
     @Test
     fun getCarCheckUps3() {
         mvc.get("/get-car-checkups/5")
-            .andExpect{
+            .andExpect {
                 status { is2xxSuccessful() }
-                content { json("[]") }
+                jsonPath("$.ownerId") { value(555) }
+                jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
+                jsonPath("$.manufacturer") { value("citroen") }
+                jsonPath("$.productionYear") { value(2005) }
+                jsonPath("$.serialNumber") { value("98765") }
+                jsonPath("$.checkUps") {listOf<CarCheckUp>()}
             }
     }
 

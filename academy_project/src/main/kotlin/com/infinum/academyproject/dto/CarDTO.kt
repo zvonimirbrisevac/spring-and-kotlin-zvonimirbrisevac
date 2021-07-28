@@ -11,7 +11,7 @@ data class CarDTO (
     val productionYear: Int,
     val serialNumber: String
 ) {
-    constructor(car : Car) : this (car.id, car.ownerId, car.addedDate, car.manufacturer, car.productionYear, car.serialNumber)
+    constructor(car : Car) : this(car.id, car.ownerId, car.addedDate, car.manufacturer, car.productionYear, car.serialNumber)
 
     fun toCar() : Car = Car(0, ownerId, addedDate, manufacturer, productionYear, serialNumber)
 }

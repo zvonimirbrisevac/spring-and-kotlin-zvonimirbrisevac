@@ -27,7 +27,7 @@ class ControllerTest @Autowired constructor(
     private val objectMapper: ObjectMapper
 ) {
 
-    /*@MockBean
+    @MockBean
     lateinit var service: CarService
 
     val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
@@ -79,6 +79,20 @@ class ControllerTest @Autowired constructor(
         Mockito.`when`(service.addCarCheckUp(AddCarCheckUpDTO(
             CarCheckUp(0, LocalDateTime.parse("2020-02-02 01:33", format), "david", 20.00, cars[2]))))
             .thenThrow(RuntimeException::class.java)
+
+        Mockito.`when`(service.addCar(
+            AddCarDTO(ownerId = 1234, manufacturer = "bmw", productionYear = 2012, serialNumber = "102030"))
+        ).thenReturn(
+            CarDTO(AddCarDTO(ownerId = 1234, manufacturer = "bmw",
+                productionYear = 2012, serialNumber = "102030").toCar())
+        )
+
+        Mockito.`when`(service.addCarCheckUp(
+            AddCarCheckUpDTO(LocalDateTime.parse("2012-05-21 12:00", format), "miro", 100.00, cars[0].id)
+        )).thenReturn(
+            CarCheckUpDTO(CarCheckUp(0, LocalDateTime.parse("2012-05-21 12:00", format), "miro", 100.00, cars[0])
+            )
+        )
     }
 
     @AfterEach
@@ -90,9 +104,8 @@ class ControllerTest @Autowired constructor(
     @Test
     fun storeSimpleCar() {
         mvc.post("/cars/add") {
-            content = objectMapper.writeValueAsString(Car(
-                ownerId = 1234, manufacturer = "bmw", productionYear = 2012, serialNumber = "102030"
-            ))
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(ownerId = 1234, manufacturer = "bmw", productionYear = 2012, serialNumber = "102030"))
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
@@ -101,7 +114,6 @@ class ControllerTest @Autowired constructor(
             jsonPath("$.manufacturer") { value("bmw") }
             jsonPath("$.productionYear") { value(2012) }
             jsonPath("$.serialNumber") { value("102030") }
-           // jsonPath("$.checkUps") { value(mutableListOf<CarCheckUp>()) }
         }
     }
 
@@ -117,7 +129,6 @@ class ControllerTest @Autowired constructor(
             jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2012-05-21 12:00", format))) }
             jsonPath("workerName") { value("miro") }
             jsonPath("price") { value(100.00) }
-            //jsonPath("carId") { value(1) }
         }
     }
 
@@ -139,20 +150,15 @@ class ControllerTest @Autowired constructor(
         mvc.get("/cars/3/checkups")
             .andExpect {
                 status { is2xxSuccessful() }
-                jsonPath("$[0].timeAndDate") { value(format.format(LocalDateTime.parse("2018-12-09 12:45", format))) }
-                jsonPath("$[0].workerName") { value("drago") }
-                jsonPath("$[0].price") { value(3000.00) }
-                //jsonPath("$[0].carId") { value(3) }
-
-                jsonPath("$[1].timeAndDate") { value(format.format(LocalDateTime.parse("2015-08-09 13:00", format))) }
-                jsonPath("$[1].workerName") { value("jura") }
-                jsonPath("$[1].price") { value(750.00) }
-               // jsonPath("$[1].carId") { value(3) }
-
-                jsonPath("$[2].timeAndDate") { value(format.format(LocalDateTime.parse("2013-10-01 14:50", format))) }
-                jsonPath("$[2].workerName") { value("blaz") }
-                jsonPath("$[2].price") { value(4230.00) }
-                //jsonPath("$[2].carId") { value(3) }
+                jsonPath("$.checkUpsDTO[0].timeAndDate") { value(format.format(LocalDateTime.parse("2018-12-09 12:45", format))) }
+                jsonPath("$.checkUpsDTO[0].workerName") { value("drago") }
+                jsonPath("$.checkUpsDTO[0].price") { value(3000.00) }
+                jsonPath("$.checkUpsDTO[1].timeAndDate") { value(format.format(LocalDateTime.parse("2015-08-09 13:00", format))) }
+                jsonPath("$.checkUpsDTO[1].workerName") { value("jura") }
+                jsonPath("$.checkUpsDTO[1].price") { value(750.00) }
+                jsonPath("$.checkUpsDTO[2].timeAndDate") { value(format.format(LocalDateTime.parse("2013-10-01 14:50", format))) }
+                jsonPath("$.checkUpsDTO[2].workerName") { value("blaz") }
+                jsonPath("$.checkUpsDTO[2].price") { value(4230.00) }
             }
     }
 
@@ -169,10 +175,9 @@ class ControllerTest @Autowired constructor(
         mvc.get("/cars/4/checkups")
             .andExpect {
                 status { is2xxSuccessful() }
-                jsonPath("$[0].timeAndDate") { value(format.format(LocalDateTime.parse("2014-04-25 09:35", format))) }
-                jsonPath("$[0].workerName") { value("pejo") }
-                jsonPath("$[0].price") { value(210.00) }
-                //jsonPath("$[0].carId") { value(4) }
+                jsonPath("$.checkUpsDTO[0].timeAndDate") { value(format.format(LocalDateTime.parse("2014-04-25 09:35", format))) }
+                jsonPath("$.checkUpsDTO[0].workerName") { value("pejo") }
+                jsonPath("$.checkUpsDTO[0].price") { value(210.00) }
             }
     }
 
@@ -181,9 +186,15 @@ class ControllerTest @Autowired constructor(
         mvc.get("/cars/5/checkups")
             .andExpect{
                 status { is2xxSuccessful() }
-                //content { json("[]") }
+                //jsonPath("$.id") { value(5) }
+                jsonPath("$.ownerId") { value(555) }
+                jsonPath("$.addedDate") { value(LocalDate.now().toString())}
+                jsonPath("$.manufacturer") { value("citroen")}
+                jsonPath("$.productionYear") { value(2005) }
+                jsonPath("$.serialNumber") { value("98765")}
+                jsonPath("$.checkUpsDTO") { isEmpty()}
             }
-    }*/
+    }
 
 
 }

@@ -98,7 +98,7 @@ class AcademyProjectApplicationTests {
             jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2021-02-02 15:00", format))) }
             jsonPath("workerName") { value("pero") }
             jsonPath("price") { value(1000.00) }
-            //jsonPath("carId") { value(1) }
+            jsonPath("car.id") { value(1) }
         }
     }
 
@@ -187,7 +187,7 @@ class AcademyProjectApplicationTests {
             jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2020-08-20 09:30", format))) }
             jsonPath("workerName") { value("pero") }
             jsonPath("price") { value(1000.00) }
-            //jsonPath("carId") { value(3) }
+            jsonPath("car.id") { value(3) }
         }
 
         mvc.post("/car-checkups/add") {
@@ -204,7 +204,7 @@ class AcademyProjectApplicationTests {
             jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 12:00", format))) }
             jsonPath("workerName") { value("marko") }
             jsonPath("price") { value(2000.00) }
-            //jsonPath("carId") { value(3) }
+            jsonPath("car.id") { value(3) }
         }
 
         mvc.post("/car-checkups/add") {
@@ -221,26 +221,23 @@ class AcademyProjectApplicationTests {
             jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 11:00", format))) }
             jsonPath("workerName") { value("ivica") }
             jsonPath("price") { value(200.00) }
-            //jsonPath("carId") { value(3) }
+            jsonPath("car.id") { value(3) }
         }
 
         mvc.get("/cars/3/checkups")
             .andExpect {
                 status { is2xxSuccessful() }
-                /*jsonPath("$.checkUpsDTO[0].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 12:00", format))) }
+                jsonPath("$.checkUpsDTO[0].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 12:00", format))) }
                 jsonPath("$.checkUpsDTO[0].workerName") { value("marko") }
                 jsonPath("$.checkUpsDTO[0].price") { value(2000.00) }
-                jsonPath("$.checkUpsDTO[0].carId") { value(3) }
 
                 jsonPath("$.checkUpsDTO[1].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 11:00", format))) }
                 jsonPath("$.checkUpsDTO[1].workerName") { value("ivica") }
                 jsonPath("$.checkUpsDTO[1].price") { value(200.00) }
-                jsonPath("$.checkUpsDTO[1].carId") { value(3) }
 
                 jsonPath("$.checkUpsDTO[2].timeAndDate") { value(format.format(LocalDateTime.parse("2020-08-20 09:30", format))) }
                 jsonPath("$.checkUpsDTO[2].workerName") { value("pero") }
                 jsonPath("$.checkUpsDTO[2].price") { value(1000.00) }
-                jsonPath("$.checkUpsDTO[2].carId") { value(3) }*/
             }
 
     }

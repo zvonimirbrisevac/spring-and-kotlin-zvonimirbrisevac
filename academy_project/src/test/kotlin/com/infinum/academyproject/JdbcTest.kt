@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 class JdbcTest {
-
+/*
     @Autowired
     lateinit var jdbcTemplate: NamedParameterJdbcTemplate
 
@@ -164,5 +164,5 @@ class JdbcTest {
         Assertions.assertThat(resultsList).isEqualTo(mutableListOf<Double>(4230.00, 3000.00, 2150.00, 2000.00, 1000.00 ))
     }
 
-
+*/
 }

@@ -10,11 +10,16 @@ interface CheckUpRepository : Repository<CarCheckUp, Long> {
 
     fun save(checkUp: CarCheckUp): CarCheckUp
 
-    fun findByCar(car: Car) : List<CarCheckUp>
+    fun findByCarOrderByTimeAndDateDesc(car: Car) : List<CarCheckUp>
 
-    fun findAll(pageable: Pageable) : Page<CarCheckUp>
+    fun findAllByCarOrderByTimeAndDateDesc(pageable: Pageable, car : Car) : Page<CarCheckUp>
 
     fun saveAll(checkUps: Iterable<CarCheckUp>) : List<CarCheckUp>
 
+    fun deleteAll()
+
+    fun findAll() : List<CarCheckUp>
+
+    fun findByWorkerNameAndPrice(workerName : String, price : Double) : CarCheckUp
 
 }

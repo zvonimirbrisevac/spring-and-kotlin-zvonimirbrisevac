@@ -11,8 +11,14 @@ interface CarRepository : Repository<Car, Long> {
 
     fun findById(id: Long) : Car?
 
+    fun findByOwnerIdAndSerialNumber(ownerId : Long, serialNumber : String) : Car
+
     fun findAll(pageable: Pageable) : Page<Car>
 
+    fun findAll() : List<Car>
+
     fun saveAll(cars: Iterable<Car>) : List<Car>
+
+    fun deleteAll()
 
 }

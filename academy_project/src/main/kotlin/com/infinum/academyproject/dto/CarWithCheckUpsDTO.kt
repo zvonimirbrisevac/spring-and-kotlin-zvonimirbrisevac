@@ -11,9 +11,10 @@ data class CarWithCheckUpsDTO(
     val manufacturer: String,
     val productionYear: Int,
     val serialNumber: String,
-    val checkUpsDTO: List<CarCheckUpDTO>
+    val checkUpsDTO: List<CarCheckUpNoCarDTO>
 ) {
     constructor(car : Car, checkUps: List<CarCheckUp>) : this(
-        car.id, car.ownerId, car.addedDate, car.manufacturer, car.productionYear, car.serialNumber, checkUps.map {CarCheckUpDTO(it)}
+        car.id, car.ownerId, car.addedDate, car.manufacturer, car.productionYear, car.serialNumber,
+        checkUps.map {CarCheckUpNoCarDTO(it)}
     )
 }

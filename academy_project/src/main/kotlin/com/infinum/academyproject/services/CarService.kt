@@ -17,13 +17,17 @@ class CarService(
 
     fun addCar(car: AddCarDTO): CarDTO = CarDTO(carRepository.save(car.toCar())) // ?: throw RuntimeException("Failed to add car.")
 
-    fun addCarCheckUp(checkUp: AddCarCheckUpDTO) : CarCheckUpDTO = CarCheckUpDTO(checkUpRepository.save(checkUp.toCarCheckUp())) // ?: throw RuntimeException("Failed to add car check up.")
+    fun addCarCheckUp(checkUp: AddCarCheckUpDTO) : CarCheckUpDTO = CarCheckUpDTO(
+        checkUpRepository.save(
+            checkUp.toCarCheckUp {
+                carId -> carRepository.findById(carId) ?: throw RuntimeException("No car with such id.")
+        })) // ?: throw RuntimeException("Failed to add car check up.")
 
 
     fun getCarCheckUps(id: Long): CarWithCheckUpsDTO {
 
         return carRepository.findById(id)?.let {
-            val checkUps = checkUpRepository.findByCar(it)
+            val checkUps = checkUpRepository.findByCarOrderByTimeAndDateDesc(it)
             CarWithCheckUpsDTO(it, checkUps)
         }
             ?: throw IllegalArgumentException("No car with such id: $id")
@@ -31,10 +35,13 @@ class CarService(
 
     fun getCarsPaged(pageable: Pageable) : Page<CarDTO> = carRepository.findAll(pageable).map { CarDTO(it) }
 
-    fun getCheckUpsPaged(pageable: Pageable) : Page<CarCheckUpDTO> = checkUpRepository.findAll(pageable).map { CarCheckUpDTO(it) }
+    fun getCheckUpsPaged(pageable: Pageable, id : Long) : Page<CarCheckUpNoCarDTO> {
+        val car : Car = carRepository.findById(id) ?: throw RuntimeException("No car with such id.")
+        return checkUpRepository.findAllByCarOrderByTimeAndDateDesc(pageable, car).map {CarCheckUpNoCarDTO(it)}
+    }
 
-    // fun deleteAllCars() = carRepository.clearCars()
+    fun deleteAllCars() = carRepository.deleteAll()
 
-    // fun deleteAllCarCheckUps() = carRepository.clearCheckUps()
+    fun deleteAllCarCheckUps() = checkUpRepository.deleteAll()
 
 }

@@ -16,43 +16,40 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 
 @Controller
+@RequestMapping("/cars")
 class CarController (
     private val carService: CarService
 ) {
 
-    @PostMapping("/add-car")
+    @PostMapping("/add")
     fun addCar(@RequestBody car : AddCarDTO) : ResponseEntity<CarDTO> {
         log.info("Adding car ${car}.")
         val carDTO : CarDTO = carService.addCar(car)
         return ResponseEntity(carDTO, HttpStatus.OK)
     }
 
-    @PostMapping("/add-car-checkup")
-    fun addCarCheckUp(@RequestBody carCheckUp: AddCarCheckUpDTO) : ResponseEntity<CarCheckUpDTO> {
-        log.info("Adding car check-up ${carCheckUp}.")
-        val carCheckUpDTO : CarCheckUpDTO = carService.addCarCheckUp(carCheckUp)
-        return ResponseEntity(carCheckUpDTO, HttpStatus.OK)
-    }
 
-    @GetMapping("/get-car-checkups/{id}")
+    @GetMapping("/{id}/checkups")
     fun getCarCheckUp(@PathVariable id : Long) : ResponseEntity<CarWithCheckUpsDTO> {
         log.info("Fetching car check-ups for car id ${id}.")
         val checkUps = carService.getCarCheckUps(id)
         return ResponseEntity(checkUps, HttpStatus.OK)
     }
 
-    @GetMapping("/all-cars-paged")
+    @GetMapping("/paged")
     fun getCarsPaged(pageable: Pageable): ResponseEntity<Page<CarDTO>> {
         log.info("Fetching one car page.")
         val page = carService.getCarsPaged(pageable)
         return ResponseEntity(page, HttpStatus.OK)
     }
 
-    /*@GetMapping("/get-car-checkup-paged/{id}")
-    fun getCheckUpsPaged(pageable: Pageable, @PathVariable id: Long) : ResponseEntity<Page<List<CarCheckUp>>> {
+    @GetMapping("/{id}/checkups-paged")
+    fun getCheckUpsPaged(pageable: Pageable, @PathVariable id: Long) : ResponseEntity<Page<CarCheckUpNoCarDTO>> {
         log.info("Fetching check up page.")
+        val page = carService.getCheckUpsPaged(pageable, id)
+        return ResponseEntity(page, HttpStatus.OK)
 
-    }*/
+    }
 
     @ExceptionHandler(value = [(Exception::class)])
     fun handleException(ex:Exception): ResponseEntity<String>{

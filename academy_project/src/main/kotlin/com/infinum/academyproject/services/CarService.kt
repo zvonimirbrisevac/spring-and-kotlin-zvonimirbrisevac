@@ -5,17 +5,25 @@ import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.repositories.CarRepository
 import com.infinum.academyproject.repositories.CheckUpRepository
+import com.infinum.academyproject.repositories.ModelRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.awt.color.ICC_Profile
 
 @Service
 class CarService(
     private val carRepository: CarRepository,
-    private val checkUpRepository : CheckUpRepository
+    private val checkUpRepository : CheckUpRepository,
+    private val modelRepository: ModelRepository
 ) {
 
-    fun addCar(car: AddCarDTO): CarDTO = CarDTO(carRepository.save(car.toCar())) // ?: throw RuntimeException("Failed to add car.")
+    fun addCar(car: AddCarDTO): CarDTO {
+        return CarDTO(carRepository.save(car.toCar {
+                manufacturer, model -> modelRepository.findByManufacturerAndModelName(manufacturer, model)
+            ?: throw  RuntimeException("Model not found.")
+        }))
+    } // ?: throw RuntimeException("Failed to add car.")
 
     fun addCarCheckUp(checkUp: AddCarCheckUpDTO) : CarCheckUpDTO = CarCheckUpDTO(
         checkUpRepository.save(
@@ -43,5 +51,11 @@ class CarService(
     fun deleteAllCars() = carRepository.deleteAll()
 
     fun deleteAllCarCheckUps() = checkUpRepository.deleteAll()
+
+    fun addCarModel(model: AddCarModelDTO) : CarModelDTO =
+        CarModelDTO(modelRepository.save(model.toCarModel()))
+
+    fun getCarModel(manufacturer : String, model : String) : CarModelDTO =
+        CarModelDTO(modelRepository.findByManufacturerAndModelName(manufacturer, model) ?: throw RuntimeException(""))
 
 }

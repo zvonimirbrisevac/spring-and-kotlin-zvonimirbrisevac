@@ -1,6 +1,7 @@
 package com.infinum.academyproject.dto
 
 import com.infinum.academyproject.models.Car
+import com.infinum.academyproject.models.CarModel
 import java.time.LocalDate
 
 data class CarDTO (
@@ -8,10 +9,13 @@ data class CarDTO (
     val ownerId: Long,
     val addedDate: LocalDate = LocalDate.now(),
     val manufacturer: String,
+    val model: String,
     val productionYear: Int,
     val serialNumber: String
 ) {
-    constructor(car : Car) : this(car.id, car.ownerId, car.addedDate, car.manufacturer, car.productionYear, car.serialNumber)
+    constructor(car : Car) : this(car.id, car.ownerId,
+        car.addedDate, car.model.manufacturer, car.model.modelName, car.productionYear, car.serialNumber)
 
-    fun toCar() : Car = Car(0, ownerId, addedDate, manufacturer, productionYear, serialNumber)
+    fun toCar(modelFetcher: (String, String) -> CarModel) : Car =
+        Car(id, ownerId, addedDate, modelFetcher.invoke(manufacturer, model), productionYear, serialNumber)
 }

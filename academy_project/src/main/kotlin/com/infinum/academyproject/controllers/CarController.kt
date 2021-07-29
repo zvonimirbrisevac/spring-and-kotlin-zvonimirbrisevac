@@ -4,6 +4,7 @@ import com.infinum.academyproject.dto.*
 import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.services.CarService
+import com.infinum.academyproject.services.SchedulingService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -18,7 +19,8 @@ import org.springframework.web.bind.annotation.*
 @Controller
 @RequestMapping("/cars")
 class CarController (
-    private val carService: CarService
+    private val carService: CarService,
+    private val scheduleService: SchedulingService
 ) {
 
     @PostMapping("/add")
@@ -59,6 +61,12 @@ class CarController (
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(CarController::class.java)
+    }
+
+    @GetMapping("/update-models")
+    fun updateModelsCheck() {
+        log.info("Updating models.")
+        scheduleService.updateModels()
     }
 
 }

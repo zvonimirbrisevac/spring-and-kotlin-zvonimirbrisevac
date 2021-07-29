@@ -14,7 +14,9 @@ data class Car(
 
     val ownerId: Long,
     val addedDate: LocalDate = LocalDate.now(),
-    val manufacturer: String,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    val model : CarModel,
     val productionYear: Int,
     val serialNumber: String
 

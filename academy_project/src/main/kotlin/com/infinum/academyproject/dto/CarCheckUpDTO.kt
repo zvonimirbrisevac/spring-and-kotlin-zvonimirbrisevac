@@ -18,5 +18,5 @@ data class CarCheckUpDTO(
     constructor(checkUp : CarCheckUp ) : this(checkUp.id, checkUp.timeAndDate, checkUp.workerName,
     checkUp.price, CarDTO(checkUp.car))
 
-    fun toCarCheckUp() : CarCheckUp = CarCheckUp(0, timeAndDate, workerName, price, car.toCar())
+    //fun toCarCheckUp() : CarCheckUp = CarCheckUp(id, timeAndDate, workerName, price, car.toCar())
 }

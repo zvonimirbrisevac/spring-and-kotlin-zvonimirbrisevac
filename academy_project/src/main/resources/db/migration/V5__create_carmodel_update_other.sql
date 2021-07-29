@@ -6,9 +6,6 @@ CREATE TABLE IF NOT EXISTS models (
     UNIQUE (manufacturer, model_name)
 );
 
-DELETE FROM cars;
-DELETE FROM checkups;
-
 ALTER SEQUENCE car_seq RESTART WITH 1;
 ALTER SEQUENCE checkup_seq RESTART WITH 1;
 

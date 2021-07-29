@@ -1,12 +1,16 @@
 package com.infinum.academyproject
 
+import com.infinum.academyproject.errors.IllegalCarModelException
 import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
+import com.infinum.academyproject.models.CarModel
 import com.infinum.academyproject.repositories.CarRepository
 import com.infinum.academyproject.repositories.CheckUpRepository
+import com.infinum.academyproject.repositories.ModelRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -20,18 +24,27 @@ import java.time.format.DateTimeFormatter
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class JpaTest @Autowired constructor(
     val carRepository: CarRepository,
-    val checkUpRepository: CheckUpRepository
+    val checkUpRepository: CheckUpRepository,
+    val modelRepository: ModelRepository
 ) {
 
     val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
     val dateFormatter  = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
+    val models = listOf(
+        CarModel(0, "Alfa Romeo", "145", true),
+        CarModel(0, "Audi", "A6", true),
+        CarModel(0, "BMW", "530", true),
+        CarModel(0, "Fiat", "Punto", true),
+        CarModel(0, "Ford", "Fiesta", true),
+    )
+
     val cars = listOf(
-        Car(ownerId = 111, manufacturer = "opel", productionYear = 2015, serialNumber = "12345"),
-        Car(ownerId = 222, manufacturer = "honda", productionYear = 2010, serialNumber = "10101"),
-        Car(ownerId = 333, manufacturer = "kia", productionYear = 2000, serialNumber = "55555"),
-        Car(ownerId = 444, manufacturer = "vw", productionYear = 1998, serialNumber = "44444"),
-        Car(ownerId = 555, manufacturer = "citroen", productionYear = 2005, serialNumber = "98765")
+        Car(ownerId = 111, model = models[0], productionYear = 2015, serialNumber = "12345"),
+        Car(ownerId = 222, model = models[1], productionYear = 2010, serialNumber = "10101"),
+        Car(ownerId = 333, model = models[2], productionYear = 2000, serialNumber = "55555"),
+        Car(ownerId = 444, model = models[3], productionYear = 1998, serialNumber = "44444"),
+        Car(ownerId = 555, model = models[4], productionYear = 2005, serialNumber = "98765")
     )
 
     val carsCheckUps = listOf(
@@ -60,9 +73,11 @@ class JpaTest @Autowired constructor(
 
         carRepository.deleteAll()
         checkUpRepository.deleteAll()
+        modelRepository.deleteAll()
 
         carRepository.saveAll(cars)
         checkUpRepository.saveAll(carsCheckUps)
+        modelRepository.saveAll(models)
 
     }
 
@@ -87,7 +102,8 @@ class JpaTest @Autowired constructor(
 
     @Test
     fun saveCar() {
-        val car = Car(ownerId = 222, manufacturer = "renault", productionYear = 2014, serialNumber = "12121" )
+        val car = Car(ownerId = 222, model = CarModel(0, "renault","megane" ,false)
+            , productionYear = 2014, serialNumber = "12121" )
         Assertions.assertThat(carRepository.save(car)).isEqualTo(car)
     }
 
@@ -95,9 +111,9 @@ class JpaTest @Autowired constructor(
     fun carPage() {
         val page = PageRequest.of(0, 3)
         val carPage = carRepository.findAll(page)
-        Assertions.assertThat(carPage.content[0].manufacturer).isEqualTo("opel")
-        Assertions.assertThat(carPage.content[1].manufacturer).isEqualTo("honda")
-        Assertions.assertThat(carPage.content[2].manufacturer).isEqualTo("kia")
+        Assertions.assertThat(carPage.content[0].model.manufacturer).isEqualTo("Alfa Romeo")
+        Assertions.assertThat(carPage.content[1].model.manufacturer).isEqualTo("Audi")
+        Assertions.assertThat(carPage.content[2].model.manufacturer).isEqualTo("BMW")
 
     }
 
@@ -110,7 +126,26 @@ class JpaTest @Autowired constructor(
         Assertions.assertThat(checkUpPage.content[1].price).isEqualTo(1000.0)
     }
 
+    @Test
+    fun saveModel() {
+        val model = CarModel(0, "Dacia", "Logan", true)
+        Assertions.assertThat(modelRepository.save(model)).isEqualTo(model)
+    }
 
+    @Test
+    fun findModelByManufAndModelName() {
+        Assertions.assertThat(modelRepository.findByManufacturerAndModelName("Audi", "A6"))
+            .isEqualTo(models[1])
+    }
+
+
+    @Test
+    fun saveCarModelThatExists() {
+        Assertions.assertThat(modelRepository.findAll()).hasSize(5)
+        //Assertions.assertThat(modelRepository.save(models[0])).isNull()
+        modelRepository.save(models[0])
+        Assertions.assertThat(modelRepository.findAll()).hasSize(5)
+    }
 
 
 }

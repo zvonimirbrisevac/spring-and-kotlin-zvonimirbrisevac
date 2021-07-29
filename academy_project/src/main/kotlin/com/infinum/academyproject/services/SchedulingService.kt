@@ -24,6 +24,7 @@ class SchedulingService(
                 modelRepository.findByManufacturerAndModelName(model.manufacturer, model.modelName)
                     ?: modelRepository.save(model.toCarModel())
             }
+            logger.info("Updating finished.")
         }
     }
 }

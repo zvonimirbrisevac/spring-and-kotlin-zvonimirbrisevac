@@ -1,6 +1,8 @@
 package com.infinum.academyproject.controllers
 
 import com.infinum.academyproject.dto.*
+import com.infinum.academyproject.errors.IllegalCarModelException
+import com.infinum.academyproject.errors.NoCarIdException
 import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.services.CarService
@@ -15,6 +17,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import java.lang.RuntimeException
 
 @Controller
 @RequestMapping("/cars")
@@ -53,10 +56,16 @@ class CarController (
 
     }
 
-    @ExceptionHandler(value = [(Exception::class)])
-    fun handleException(ex:Exception): ResponseEntity<String>{
-        log.error("Error occurred", ex)
-        return ResponseEntity("Error occurred", HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = [NoCarIdException::class, IllegalCarModelException::class])
+    fun handleCustomException(ex:Exception): ResponseEntity<String>{
+        log.error("${ex.message}", ex)
+        return ResponseEntity("Error occurred. ${ex.message}", HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(value = [RuntimeException::class])
+    fun handleRuntimeException(ex:Exception): ResponseEntity<String>{
+        log.error("${ex.message}", ex)
+        return ResponseEntity("Runtime Error occurred. ${ex.message}", HttpStatus.BAD_REQUEST)
     }
 
     companion object {

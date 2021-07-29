@@ -5,12 +5,21 @@ import com.infinum.academyproject.dto.AddCarCheckUpDTO
 import com.infinum.academyproject.dto.AddCarDTO
 import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
+import com.infinum.academyproject.models.CarModel
+import com.infinum.academyproject.services.CarService
+import com.infinum.academyproject.services.SchedulingService
 import org.apache.catalina.manager.StatusTransformer
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockserver.client.MockServerClient
+import org.mockserver.model.HttpRequest
+import org.mockserver.model.HttpResponse
+import org.mockserver.springtest.MockServerTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
@@ -22,6 +31,7 @@ import java.time.format.DateTimeFormatter
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@MockServerTest
 class AcademyProjectApplicationTests {
 
     @Autowired
@@ -30,14 +40,59 @@ class AcademyProjectApplicationTests {
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
+    lateinit var mockServerClient: MockServerClient
+
+    @MockBean
+    lateinit var service: SchedulingService
+
+    @BeforeEach
+    fun setUp() {
+        mockServerClient
+            .`when`(
+                HttpRequest.request()
+                    .withPath("/api/v1/cars")
+            )
+            .respond(
+                HttpResponse.response()
+                    .withStatusCode(200)
+                   // .withContentType(MediaType.APPLICATION_JSON)
+                    .withBody(
+                        """
+                        {
+                            "data": [
+                                :[{"manufacturer":"Alfa Romeo","model_name":"145","is_common":0},
+                                {"manufacturer":"Audi","model_name":"A6","is_common":0},
+                                {"manufacturer":"BMW","model_name":"530","is_common":0},
+                                {"manufacturer":"Fiat","model_name":"Punto","is_common":0},
+                                {"manufacturer":"Ford","model_name":"Fiesta","is_common":0},
+                                {"manufacturer":"Mazda","model_name":"323","is_common":0}
+                                {"manufacturer":"Nissan","model_name":"Juke","is_common":0}
+                                {"manufacturer":"Dacia","model_name":"Duster","is_common":0}
+
+                            ]
+                        }
+                    """.trimIndent()
+                    )
+            )
+    }
+
     val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
+    val models = listOf(
+        CarModel(0, "Alfa Romeo", "145", true),
+        CarModel(0, "Audi", "A6", true),
+        CarModel(0, "BMW", "530", true),
+        CarModel(0, "Fiat", "Punto", true),
+        CarModel(0, "Ford", "Fiesta", true),
+        CarModel(0, "fake", "fake", false)
+    )
+
     val cars = listOf(
-        Car(ownerId = 111, manufacturer = "opel", productionYear = 2015, serialNumber = "12345"),
-        Car(ownerId = 222, manufacturer = "honda", productionYear = 2010, serialNumber = "10101"),
-        Car(ownerId = 333, manufacturer = "kia", productionYear = 2000, serialNumber = "55555"),
-        Car(ownerId = 444, manufacturer = "vw", productionYear = 1998, serialNumber = "44444"),
-        Car(ownerId = 555, manufacturer = "citroen", productionYear = 2005, serialNumber = "98765")
+        Car(ownerId = 111, model = models[0], productionYear = 2015, serialNumber = "12345"),
+        Car(ownerId = 222, model = models[1], productionYear = 2010, serialNumber = "10101"),
+        Car(ownerId = 333, model = models[2], productionYear = 2000, serialNumber = "55555"),
+        Car(ownerId = 444, model = models[3], productionYear = 1998, serialNumber = "44444"),
+        Car(ownerId = 555, model = models[4], productionYear = 2005, serialNumber = "98765")
     )
 
     val carsCheckUps = listOf(
@@ -56,9 +111,11 @@ class AcademyProjectApplicationTests {
     fun testSimplePostCar() {
         val car = AddCarDTO(
             ownerId = 111,
-            manufacturer = "mazda",
+            manufacturer = "Mazda",
+            model = "323",
             productionYear = 1999,
-            serialNumber = "1111",
+            serialNumber = "1111"
+
         )
 
         mvc.post("/cars/add") {
@@ -68,7 +125,8 @@ class AcademyProjectApplicationTests {
             status { is2xxSuccessful() }
             jsonPath("$.ownerId") { value(111) }
             jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("mazda") }
+            jsonPath("$.manufacturer") { value("Mazda") }
+            jsonPath("$.model") { value("323") }
             jsonPath("$.productionYear") { value(1999) }
             jsonPath("$.serialNumber") { value("1111") }
         }
@@ -78,7 +136,13 @@ class AcademyProjectApplicationTests {
     fun testSimplePostCarCheckUp() {
         mvc.post("/cars/add") {
             content = objectMapper.writeValueAsString(
-                AddCarDTO(ownerId = 222, manufacturer = "dacia", productionYear = 2019, serialNumber = "2222")
+                AddCarDTO(
+                    ownerId = 222,
+                    manufacturer = "Dacia",
+                    model = "Duster",
+                    productionYear = 2019,
+                    serialNumber = "2222"
+                )
             )
             contentType = MediaType.APPLICATION_JSON
         }
@@ -123,52 +187,62 @@ class AcademyProjectApplicationTests {
     fun testGetCarCheckUps() {
 
         mvc.post("/cars/add") {
-            content = objectMapper.writeValueAsString(AddCarDTO(
-                ownerId = 111,
-                manufacturer = "mazda",
-                productionYear = 1999,
-                serialNumber = "1111",
-            ))
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 111,
+                    manufacturer = "Mazda",
+                    model = "323",
+                    productionYear = 1999,
+                    serialNumber = "1111",
+                )
+            )
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
             jsonPath("$.ownerId") { value(111) }
             jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("mazda") }
+            jsonPath("$.manufacturer") { value("Mazda") }
+            jsonPath("$.model") { value("323") }
             jsonPath("$.productionYear") { value(1999) }
             jsonPath("$.serialNumber") { value("1111") }
         }
 
         mvc.post("/cars/add") {
-            content = objectMapper.writeValueAsString(AddCarDTO(
-                ownerId = 112,
-                manufacturer = "nissan",
-                productionYear = 2008,
-                serialNumber = "1222",
-            ))
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 112,
+                    manufacturer = "Nissan",
+                    model = "Juke",
+                    productionYear = 2008,
+                    serialNumber = "1222",
+                )
+            )
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
             jsonPath("$.ownerId") { value(112) }
             jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("nissan") }
+            jsonPath("$.manufacturer") { value("Nissan") }
             jsonPath("$.productionYear") { value(2008) }
             jsonPath("$.serialNumber") { value("1222") }
         }
 
         mvc.post("/cars/add") {
-            content = objectMapper.writeValueAsString(Car(
-                ownerId = 113,
-                manufacturer = "pezo",
-                productionYear = 2009,
-                serialNumber = "1223",
-            ))
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 113,
+                    manufacturer = "Peugeot",
+                    model = "206",
+                    productionYear = 2009,
+                    serialNumber = "1223",
+                )
+            )
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
             jsonPath("$.ownerId") { value(113) }
             jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("pezo") }
+            jsonPath("$.manufacturer") { value("Peugeot") }
             jsonPath("$.productionYear") { value(2009) }
             jsonPath("$.serialNumber") { value("1223") }
         }
@@ -227,15 +301,42 @@ class AcademyProjectApplicationTests {
         mvc.get("/cars/3/checkups")
             .andExpect {
                 status { is2xxSuccessful() }
-                jsonPath("$.checkUpsDTO[0].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 12:00", format))) }
+                jsonPath("$.checkUpsDTO[0].timeAndDate") {
+                    value(
+                        format.format(
+                            LocalDateTime.parse(
+                                "2021-12-15 12:00",
+                                format
+                            )
+                        )
+                    )
+                }
                 jsonPath("$.checkUpsDTO[0].workerName") { value("marko") }
                 jsonPath("$.checkUpsDTO[0].price") { value(2000.00) }
 
-                jsonPath("$.checkUpsDTO[1].timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 11:00", format))) }
+                jsonPath("$.checkUpsDTO[1].timeAndDate") {
+                    value(
+                        format.format(
+                            LocalDateTime.parse(
+                                "2021-12-15 11:00",
+                                format
+                            )
+                        )
+                    )
+                }
                 jsonPath("$.checkUpsDTO[1].workerName") { value("ivica") }
                 jsonPath("$.checkUpsDTO[1].price") { value(200.00) }
 
-                jsonPath("$.checkUpsDTO[2].timeAndDate") { value(format.format(LocalDateTime.parse("2020-08-20 09:30", format))) }
+                jsonPath("$.checkUpsDTO[2].timeAndDate") {
+                    value(
+                        format.format(
+                            LocalDateTime.parse(
+                                "2020-08-20 09:30",
+                                format
+                            )
+                        )
+                    )
+                }
                 jsonPath("$.checkUpsDTO[2].workerName") { value("pero") }
                 jsonPath("$.checkUpsDTO[2].price") { value(1000.00) }
             }
@@ -245,9 +346,28 @@ class AcademyProjectApplicationTests {
     @Test
     fun testGetCarCheckupsFail() {
         mvc.get("/cars/100/checkups")
-            .andExpect{
+            .andExpect {
                 status { is4xxClientError() }
             }
+    }
+
+    @Test
+    fun testPostCarInvalidModel() {
+        val car = AddCarDTO(
+            ownerId = 111,
+            manufacturer = "bzvz",
+            model = "bzvz",
+            productionYear = 1999,
+            serialNumber = "1111"
+
+        )
+
+        mvc.post("/cars/add") {
+            content = objectMapper.writeValueAsString(car)
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { is4xxClientError() }
+        }
     }
 
 }

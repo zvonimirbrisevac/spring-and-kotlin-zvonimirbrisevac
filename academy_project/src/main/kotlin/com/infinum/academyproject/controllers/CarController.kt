@@ -78,4 +78,8 @@ class CarController (
         scheduleService.updateModels()
     }
 
+    @PostMapping("/add-models-for-tests")
+    fun addModelTest(@RequestBody carModelDTO: AddCarModelDTO) {
+
+    }
 }

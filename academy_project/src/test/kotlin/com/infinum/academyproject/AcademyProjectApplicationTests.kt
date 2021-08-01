@@ -3,9 +3,11 @@ package com.infinum.academyproject
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.infinum.academyproject.dto.AddCarCheckUpDTO
 import com.infinum.academyproject.dto.AddCarDTO
+import com.infinum.academyproject.dto.AddCarModelDTO
 import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.models.CarModel
+import com.infinum.academyproject.repositories.ModelRepository
 import com.infinum.academyproject.services.CarService
 import com.infinum.academyproject.services.SchedulingService
 import org.apache.catalina.manager.StatusTransformer
@@ -32,18 +34,23 @@ import java.time.format.DateTimeFormatter
 @SpringBootTest
 @AutoConfigureMockMvc
 @MockServerTest
+@MockBean(SchedulingService::class)
 class AcademyProjectApplicationTests {
 
     @Autowired
     lateinit var mvc: MockMvc
+
+//    @MockBean
+//    lateinit var modelRepository: ModelRepository
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
     lateinit var mockServerClient: MockServerClient
 
-    @MockBean
-    lateinit var service: SchedulingService
+//    @MockBean
+//    lateinit var service: SchedulingService
+
 
     @BeforeEach
     fun setUp() {
@@ -74,6 +81,15 @@ class AcademyProjectApplicationTests {
                     """.trimIndent()
                     )
             )
+
+        for (i in 0..4) {
+            mvc.post("/add-models-for-tests"){
+                content = objectMapper.writeValueAsString(AddCarModelDTO(models[i].manufacturer, models[i].modelName,
+                if (models[i].isCommon) 1 else 0 ))
+                contentType = MediaType.APPLICATION_JSON
+            }
+        }
+
     }
 
     val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")

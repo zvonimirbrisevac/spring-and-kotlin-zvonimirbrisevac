@@ -54,5 +54,5 @@ class CarService(
 
     fun deleteAllCarCheckUps() = checkUpRepository.deleteAll()
 
-
+    fun saveModel(model: AddCarModelDTO) = modelRepository.save(model.toCarModel())
 }

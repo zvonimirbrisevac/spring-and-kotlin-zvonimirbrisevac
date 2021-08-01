@@ -33,6 +33,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-jdbc")
 	implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.24.0")
 	implementation("net.javacrumbs.shedlock:shedlock-spring:4.24.0")
+	implementation("org.springframework.boot:spring-boot-starter-hateoas")
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("com.ninja-squad:springmockk:3.0.1")

@@ -1,32 +1,66 @@
 package com.infinum.academyproject.controllers
 
+import com.infinum.academyproject.controllers.CarController.Companion.log
 import com.infinum.academyproject.dto.AddCarCheckUpDTO
 import com.infinum.academyproject.dto.CarCheckUpDTO
+import com.infinum.academyproject.models.CarCheckUpDurationFromNow
+import com.infinum.academyproject.resources.CarCheckUpResource
+import com.infinum.academyproject.resources.assemblers.CarCheckUpsPagedResourcesAssembler
 import com.infinum.academyproject.services.CarService
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PagedResourcesAssembler
+import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 @Controller
 @RequestMapping("/car-checkups")
-class CarCheckUpController (
-    private val carService: CarService
+class CarCheckUpController(
+    private val carService: CarService,
+    private val carCheckUpsResourcesAssembler: CarCheckUpsPagedResourcesAssembler
+
 ) {
 
-    @PostMapping("/add")
-    fun addCarCheckUp(@RequestBody carCheckUp: AddCarCheckUpDTO) : ResponseEntity<CarCheckUpDTO> {
-        CarController.log.info("Adding car check-up ${carCheckUp}.")
-        val carCheckUpDTO : CarCheckUpDTO = carService.addCarCheckUp(carCheckUp)
-        return ResponseEntity(carCheckUpDTO, HttpStatus.OK)
+    @PostMapping
+    fun addCarCheckUp(@RequestBody carCheckUp: AddCarCheckUpDTO): ResponseEntity<Unit> {
+        log.info("Adding car check-up ${carCheckUp}.")
+        val carCheckUpDTO: CarCheckUpDTO = carService.addCarCheckUp(carCheckUp)
+        val location = ServletUriComponentsBuilder
+            .fromCurrentRequest()
+            .path("/${carCheckUpDTO.id}")
+            .buildAndExpand()
+            .toUri()
+        return ResponseEntity.created(location).build()
     }
 
+
+    @GetMapping
+    fun getLastTenCheckUps(pagedResourcesAssembler: PagedResourcesAssembler<CarCheckUpDTO>):
+            ResponseEntity<PagedModel<CarCheckUpResource>>{
+        log.info("Fetching last 10 check-ups.")
+        val pageable: Pageable = Pageable.ofSize(10).withPage(1)
+        val page = carService.getLastTenCheckUps(pageable)
+        return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpsResourcesAssembler), HttpStatus.OK)
+
+    }
+
+    @GetMapping("/upcoming")
+    fun getUpcomingCheckUps(
+        @RequestParam(defaultValue = "ONE_MONTH") duration: CarCheckUpDurationFromNow, pageable: Pageable,
+        pagedResourcesAssembler: PagedResourcesAssembler<CarCheckUpDTO>
+    ) : ResponseEntity<PagedModel<CarCheckUpResource>>{
+        log.info("Fetching upcoming checkups.")
+        val page = carService.getUpcomingCheckUps(duration, pageable)
+        return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpsResourcesAssembler), HttpStatus.OK)
+    }
+
+
     @ExceptionHandler(value = [(Exception::class)])
-    fun handleException(ex:Exception): ResponseEntity<String>{
-        CarController.log.error("Error occurred", ex)
+    fun handleException(ex: Exception): ResponseEntity<String> {
+        log.error("Error occurred", ex)
         return ResponseEntity("Error occurred", HttpStatus.BAD_REQUEST)
     }
 }

@@ -31,7 +31,7 @@ class ControllerTest @Autowired constructor(
     private val objectMapper: ObjectMapper
 ) {
 
-
+/*
     @MockBean
     lateinit var service: CarService
 
@@ -311,6 +311,6 @@ class ControllerTest @Autowired constructor(
             status { is4xxClientError()}
         }
     }
-
+*/
 
 }

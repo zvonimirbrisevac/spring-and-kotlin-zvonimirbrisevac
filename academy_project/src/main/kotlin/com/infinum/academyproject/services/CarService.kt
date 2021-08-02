@@ -51,11 +51,13 @@ class CarService(
 
     fun getUpcomingCheckUps(durationFromNow: CarCheckUpDurationFromNow, pageable: Pageable) : Page<CarCheckUpDTO>{
         val durationString : String = when(durationFromNow) {
-            CarCheckUpDurationFromNow.ONE_WEEK -> "interval '1 week'"
-            CarCheckUpDurationFromNow.ONE_MONTH -> "interval '1 month'"
-            CarCheckUpDurationFromNow.HALF_YEAR -> "interval '6 months'"
+            CarCheckUpDurationFromNow.ONE_WEEK ->
+                return checkUpRepository.findUpcomingCheckUps(numWeeks = 1, pageable = pageable).map { CarCheckUpDTO(it) }
+            CarCheckUpDurationFromNow.ONE_MONTH ->
+                return checkUpRepository.findUpcomingCheckUps(numMonths = 1, pageable = pageable).map { CarCheckUpDTO(it) }
+            CarCheckUpDurationFromNow.HALF_YEAR ->
+                return checkUpRepository.findUpcomingCheckUps(numMonths = 6, pageable = pageable).map { CarCheckUpDTO(it) }
         }
-        return checkUpRepository.findUpcomingCheckUps(durationString, pageable).map { CarCheckUpDTO(it) }
     }
 
     fun deleteAllCars() = carRepository.deleteAll()

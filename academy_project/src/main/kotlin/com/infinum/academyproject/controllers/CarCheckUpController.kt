@@ -5,8 +5,9 @@ import com.infinum.academyproject.dto.AddCarCheckUpDTO
 import com.infinum.academyproject.dto.CarCheckUpDTO
 import com.infinum.academyproject.models.CarCheckUpDurationFromNow
 import com.infinum.academyproject.resources.CarCheckUpResource
-import com.infinum.academyproject.resources.assemblers.CarCheckUpsPagedResourcesAssembler
+import com.infinum.academyproject.resources.assemblers.CarCheckUpResourceAssembler
 import com.infinum.academyproject.services.CarService
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
@@ -20,7 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 @RequestMapping("/car-checkups")
 class CarCheckUpController(
     private val carService: CarService,
-    private val carCheckUpsResourcesAssembler: CarCheckUpsPagedResourcesAssembler
+    private val carCheckUpResourceAssembler: CarCheckUpResourceAssembler
 
 ) {
 
@@ -41,9 +42,10 @@ class CarCheckUpController(
     fun getLastTenCheckUps(pagedResourcesAssembler: PagedResourcesAssembler<CarCheckUpDTO>):
             ResponseEntity<PagedModel<CarCheckUpResource>>{
         log.info("Fetching last 10 check-ups.")
-        val pageable: Pageable = Pageable.ofSize(10).withPage(1)
+        // val pageable: Pageable = Pageable.ofSize(10).withPage(0)
+        val pageable: Pageable = PageRequest.of(0, 10)
         val page = carService.getLastTenCheckUps(pageable)
-        return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpsResourcesAssembler), HttpStatus.OK)
+        return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpResourceAssembler), HttpStatus.OK)
 
     }
 
@@ -54,7 +56,7 @@ class CarCheckUpController(
     ) : ResponseEntity<PagedModel<CarCheckUpResource>>{
         log.info("Fetching upcoming checkups.")
         val page = carService.getUpcomingCheckUps(duration, pageable)
-        return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpsResourcesAssembler), HttpStatus.OK)
+        return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpResourceAssembler), HttpStatus.OK)
     }
 
 

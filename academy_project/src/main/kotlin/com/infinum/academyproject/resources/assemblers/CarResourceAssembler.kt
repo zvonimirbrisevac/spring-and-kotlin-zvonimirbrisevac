@@ -3,14 +3,14 @@ package com.infinum.academyproject.resources.assemblers
 import com.infinum.academyproject.controllers.CarController
 import com.infinum.academyproject.dto.CarCheckUpDTO
 import com.infinum.academyproject.dto.CarDTO
-import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.resources.CarResource
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PagedResourcesAssembler
-import org.springframework.hateoas.server.RepresentationModelAssembler
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.hateoas.server.mvc.linkTo
+import org.springframework.stereotype.Component
 
+@Component
 class CarResourceAssembler : RepresentationModelAssemblerSupport<CarDTO, CarResource>(
        CarController::class.java, CarResource::class.java
     ){

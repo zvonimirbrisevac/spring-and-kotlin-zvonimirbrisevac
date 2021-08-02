@@ -7,7 +7,7 @@ import com.infinum.academyproject.errors.IllegalCarModelException
 import com.infinum.academyproject.errors.NoCarIdException
 import com.infinum.academyproject.resources.CarCheckUpResource
 import com.infinum.academyproject.resources.CarResource
-import com.infinum.academyproject.resources.assemblers.CarCheckUpsPagedResourcesAssembler
+import com.infinum.academyproject.resources.assemblers.CarCheckUpResourceAssembler
 import com.infinum.academyproject.resources.assemblers.CarResourceAssembler
 import com.infinum.academyproject.services.CarService
 import org.slf4j.Logger
@@ -26,7 +26,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 class CarController(
     private val carService: CarService,
     private val carResourceAssembler: CarResourceAssembler,
-    private val carCheckUpsResourcesAssembler: CarCheckUpsPagedResourcesAssembler
+    private val carCheckUpResourceAssembler: CarCheckUpResourceAssembler
     //private val scheduleService: SchedulingService
 ) {
 
@@ -35,7 +35,7 @@ class CarController(
         log.info("Adding car ${car}.")
         val carDTO: CarDTO = carService.addCar(car)
         val location = ServletUriComponentsBuilder.fromCurrentRequest()
-            .path("/{${carDTO.id}}")
+            .path("/${carDTO.id}")
             .buildAndExpand()
             .toUri()
         return ResponseEntity.created(location).build()
@@ -66,7 +66,7 @@ class CarController(
     ): ResponseEntity<PagedModel<CarCheckUpResource>> {
         log.info("Fetching check-ups page for car id $id.")
         val page = carService.getCheckUpsPaged(pageable, id)
-        return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpsResourcesAssembler), HttpStatus.OK)
+        return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpResourceAssembler), HttpStatus.OK) // pokusaj apply dodat
 
     }
 

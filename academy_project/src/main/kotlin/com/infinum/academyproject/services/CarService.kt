@@ -57,7 +57,7 @@ class CarService(
         }
     }
 
-    fun saveCar(model: AddCarModelDTO)
+    fun saveModel(model: AddCarModelDTO) = modelRepository.save(model.toCarModel())
 
     fun deleteAllCars() = carRepository.deleteAll()
 

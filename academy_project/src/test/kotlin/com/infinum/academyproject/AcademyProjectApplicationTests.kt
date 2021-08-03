@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
+import org.springframework.jmx.support.JmxUtils
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -91,7 +92,6 @@ class AcademyProjectApplicationTests @Autowired constructor(
             }
         }
 
-
     }
 
     val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
@@ -136,23 +136,17 @@ class AcademyProjectApplicationTests @Autowired constructor(
 
         )
 
-        mvc.post("/cars/add") {
+        mvc.post("/cars") {
             content = objectMapper.writeValueAsString(car)
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
-            jsonPath("$.ownerId") { value(111) }
-            jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("Mazda") }
-            jsonPath("$.model") { value("323") }
-            jsonPath("$.productionYear") { value(1999) }
-            jsonPath("$.serialNumber") { value("1111") }
         }
     }
 
     @Test
     fun testSimplePostCarCheckUp() {
-        mvc.post("/cars/add") {
+        mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
                 AddCarDTO(
                     ownerId = 222,
@@ -165,10 +159,10 @@ class AcademyProjectApplicationTests @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
         }
 
-        mvc.post("/car-checkups/add") {
+        mvc.post("/car-checkups") {
             content = objectMapper.writeValueAsString(
                 AddCarCheckUpDTO(
-                    timeAndDate = LocalDateTime.parse("2021-02-02 15:00", format),
+                    timeAndDate = LocalDateTime.parse("2023-12-02 15:00", format),
                     workerName = "pero", price = 1000.00, carId = 1
                 )
             )
@@ -176,18 +170,13 @@ class AcademyProjectApplicationTests @Autowired constructor(
 
         }.andExpect {
             status { is2xxSuccessful() }
-            //jsonPath("timeAndDate") { value(LocalDateTime.parse("2021-02-02 15:00", format))}
-            jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2021-02-02 15:00", format))) }
-            jsonPath("workerName") { value("pero") }
-            jsonPath("price") { value(1000.00) }
-            jsonPath("car.id") { value(1) }
         }
     }
 
     @Test
     fun testAddCarCheckUpFail() {
 
-        mvc.post("/car-checkups/add") {
+        mvc.post("/car-checkups") {
             content = objectMapper.writeValueAsString(
                 AddCarCheckUpDTO(
                     timeAndDate = LocalDateTime.parse("2021-12-12 15:00", format),
@@ -204,7 +193,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     @Test
     fun testGetCarCheckUps() {
 
-        mvc.post("/cars/add") {
+        mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
                 AddCarDTO(
                     ownerId = 111,
@@ -217,15 +206,9 @@ class AcademyProjectApplicationTests @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
-            jsonPath("$.ownerId") { value(111) }
-            jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("Mazda") }
-            jsonPath("$.model") { value("323") }
-            jsonPath("$.productionYear") { value(1999) }
-            jsonPath("$.serialNumber") { value("1111") }
         }
 
-        mvc.post("/cars/add") {
+       mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
                 AddCarDTO(
                     ownerId = 112,
@@ -238,19 +221,14 @@ class AcademyProjectApplicationTests @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
-            jsonPath("$.ownerId") { value(112) }
-            jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("Nissan") }
-            jsonPath("$.productionYear") { value(2008) }
-            jsonPath("$.serialNumber") { value("1222") }
         }
 
-        mvc.post("/cars/add") {
+        mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
                 AddCarDTO(
                     ownerId = 113,
-                    manufacturer = "Peugeot",
-                    model = "206",
+                    manufacturer = "Fiat",
+                    model = "Punto",
                     productionYear = 2009,
                     serialNumber = "1223",
                 )
@@ -258,106 +236,57 @@ class AcademyProjectApplicationTests @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
-            jsonPath("$.ownerId") { value(113) }
-            jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("Peugeot") }
-            jsonPath("$.productionYear") { value(2009) }
-            jsonPath("$.serialNumber") { value("1223") }
+
         }
 
-        mvc.post("/car-checkups/add") {
+        mvc.post("/car-checkups") {
             content = objectMapper.writeValueAsString(
                 AddCarCheckUpDTO(
-                    timeAndDate = LocalDateTime.parse("2020-08-20 09:30", format),
+                    timeAndDate = LocalDateTime.parse("2022-04-20 09:30", format),
                     workerName = "pero", price = 1000.00, carId = 3
                 )
             )
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
-            //jsonPath("timeAndDate") { value(LocalDateTime.parse("2021-02-02 15:00", format))}
-            jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2020-08-20 09:30", format))) }
-            jsonPath("workerName") { value("pero") }
-            jsonPath("price") { value(1000.00) }
-            jsonPath("car.id") { value(3) }
         }
 
-        mvc.post("/car-checkups/add") {
+        mvc.post("/car-checkups") {
             content = objectMapper.writeValueAsString(
                 AddCarCheckUpDTO(
-                    timeAndDate = LocalDateTime.parse("2021-12-15 12:00", format),
+                    timeAndDate = LocalDateTime.parse("2022-12-15 12:00", format),
                     workerName = "marko", price = 2000.00, carId = 3
                 )
             )
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
-            //jsonPath("timeAndDate") { value(LocalDateTime.parse("2021-02-02 15:00", format))}
-            jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 12:00", format))) }
-            jsonPath("workerName") { value("marko") }
-            jsonPath("price") { value(2000.00) }
-            jsonPath("car.id") { value(3) }
         }
 
-        mvc.post("/car-checkups/add") {
+        mvc.post("/car-checkups") {
             content = objectMapper.writeValueAsString(
                 AddCarCheckUpDTO(
-                    timeAndDate = LocalDateTime.parse("2021-12-15 11:00", format),
+                    timeAndDate = LocalDateTime.parse("2022-12-15 11:00", format),
                     workerName = "ivica", price = 200.00, carId = 3
                 )
             )
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
             status { is2xxSuccessful() }
-            //jsonPath("timeAndDate") { value(LocalDateTime.parse("2021-02-02 15:00", format))}
-            jsonPath("timeAndDate") { value(format.format(LocalDateTime.parse("2021-12-15 11:00", format))) }
-            jsonPath("workerName") { value("ivica") }
-            jsonPath("price") { value(200.00) }
-            jsonPath("car.id") { value(3) }
         }
 
         mvc.get("/cars/3/checkups")
             .andExpect {
                 status { is2xxSuccessful() }
-                jsonPath("$.checkUpsDTO[0].timeAndDate") {
-                    value(
-                        format.format(
-                            LocalDateTime.parse(
-                                "2021-12-15 12:00",
-                                format
-                            )
-                        )
-                    )
-                }
-                jsonPath("$.checkUpsDTO[0].workerName") { value("marko") }
-                jsonPath("$.checkUpsDTO[0].price") { value(2000.00) }
+                jsonPath("$._embedded.item[0].workerName") { value("marko") }
+                jsonPath("$._embedded.item[0].price") { value(2000.00) }
 
-                jsonPath("$.checkUpsDTO[1].timeAndDate") {
-                    value(
-                        format.format(
-                            LocalDateTime.parse(
-                                "2021-12-15 11:00",
-                                format
-                            )
-                        )
-                    )
-                }
-                jsonPath("$.checkUpsDTO[1].workerName") { value("ivica") }
-                jsonPath("$.checkUpsDTO[1].price") { value(200.00) }
+                jsonPath("$._embedded.item[1].workerName") { value("ivica") }
+                jsonPath("$._embedded.item[1].price") { value(200.00) }
 
-                jsonPath("$.checkUpsDTO[2].timeAndDate") {
-                    value(
-                        format.format(
-                            LocalDateTime.parse(
-                                "2020-08-20 09:30",
-                                format
-                            )
-                        )
-                    )
-                }
-                jsonPath("$.checkUpsDTO[2].workerName") { value("pero") }
-                jsonPath("$.checkUpsDTO[2].price") { value(1000.00) }
-            }
+                jsonPath("$._embedded.item[2].workerName") { value("pero") }
+                jsonPath("$._embedded.item[2].price") { value(1000.00) }
+        }
 
     }
 
@@ -386,6 +315,325 @@ class AcademyProjectApplicationTests @Autowired constructor(
         }.andExpect {
             status { is4xxClientError() }
         }
+    }
+
+    @Test
+    fun getLastTenCheckups() {
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 122,
+                    manufacturer = "Dacia",
+                    model = "Duster",
+                    productionYear = 1999,
+                    serialNumber = "1222",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 123,
+                    manufacturer = "Audi",
+                    model = "A6",
+                    productionYear = 2000,
+                    serialNumber = "1233",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse("2021-02-16 11:00", format),
+                    workerName = "ivica", price = 200.00, carId = 1
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse("2015-10-09 11:00", format),
+                    workerName = "perica", price = 200.00, carId = 2
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse("2015-10-09 10:00", format),
+                    workerName = "marko", price = 200.00, carId = 1
+                )
+         )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse("2022-02-15 11:00", format).plusYears(1),
+                    workerName = "josip", price = 200.00, carId = 2
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse("2017-03-15 11:00", format),
+                    workerName = "ante", price = 200.00, carId = 2
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse("2020-12-15 11:00", format),
+                    workerName = "matej", price = 200.00, carId = 1)
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+
+        mvc.get("/car-checkups")
+            .andExpect {
+                status { is2xxSuccessful() }
+                jsonPath("$._embedded.item.length()") {value(5)}
+
+                jsonPath("$._embedded.item[0].workerName") { value("ivica") }
+                jsonPath("$._embedded.item[0]._links.car.href") {
+                    value("http://localhost/cars/1") }
+
+                jsonPath("$._embedded.item[1].workerName") { value("matej") }
+
+                jsonPath("$._embedded.item[2].workerName") { value("ante") }
+                jsonPath("$._embedded.item[2]._links.car.href") {
+                    value("http://localhost/cars/2") }
+
+                jsonPath("$._embedded.item[3].workerName") { value("perica") }
+
+                jsonPath("$._embedded.item[4].workerName") { value("marko") }
+
+            }
+
+    }
+
+    @Test
+    fun getUpcomingCheckUpsWeekAndHalfYear() {
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 122,
+                    manufacturer = "Dacia",
+                    model = "Duster",
+                    productionYear = 2020,
+                    serialNumber = "1221",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 124,
+                    manufacturer = "Audi",
+                    model = "A6",
+                    productionYear = 2010,
+                    serialNumber = "1234",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 132,
+                    manufacturer = "Fiat",
+                    model = "Punto",
+                    productionYear = 1995,
+                    serialNumber = "1322",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 123,
+                    manufacturer = "Alfa Romeo",
+                    model = "145",
+                    productionYear = 2000,
+                    serialNumber = "1233",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { is2xxSuccessful() }
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusWeeks(3)), format),
+                    workerName = "ivica", price = 200.00, carId = 4
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusMonths(3)), format),
+                    workerName = "perica", price = 200.00, carId = 4
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusMonths(8)), format),
+                    workerName = "marko", price = 200.00, carId = 3
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusDays(2)), format),
+                    workerName = "josip", price = 200.00, carId = 3
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusDays(5)), format),
+                    workerName = "ante", price = 200.00, carId = 4
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusHours(1)), format),
+                    workerName = "matej", price = 200.00, carId = 3)
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusWeeks(2)), format),
+                    workerName = "mato", price = 200.00, carId = 3)
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusDays(3)), format),
+                    workerName = "borna", price = 200.00, carId = 4)
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.get("/car-checkups/upcoming") {
+            param("duration", "ONE_WEEK")
+        }.andExpect {
+            status { is2xxSuccessful() }
+            jsonPath("$._embedded.item.length()") {value(4)}
+
+            jsonPath("$._embedded.item[0].workerName") { value("matej") }
+            jsonPath("$._embedded.item[0]._links.car.href") {
+                value("http://localhost/cars/3") }
+
+            jsonPath("$._embedded.item[1].workerName") { value("josip") }
+            jsonPath("$._embedded.item[1]._links.car.href") {
+                value("http://localhost/cars/3") }
+
+            jsonPath("$._embedded.item[2].workerName") { value("borna") }
+            jsonPath("$._embedded.item[2]._links.car.href") {
+                value("http://localhost/cars/4") }
+
+            jsonPath("$._embedded.item[3].workerName") { value("ante") }
+            jsonPath("$._embedded.item[3]._links.car.href") {
+                value("http://localhost/cars/4") }
+
+        }
+
+        mvc.get("/car-checkups/upcoming") {
+            param("duration", "HALF_YEAR")
+        }.andExpect {
+            status { is2xxSuccessful() }
+            jsonPath("$._embedded.item.length()") {value(7)}
+
+            jsonPath("$._embedded.item[0].workerName") { value("matej") }
+            jsonPath("$._embedded.item[0]._links.car.href") {
+                value("http://localhost/cars/3") }
+
+            jsonPath("$._embedded.item[1].workerName") { value("josip") }
+            jsonPath("$._embedded.item[1]._links.car.href") {
+                value("http://localhost/cars/3") }
+
+            jsonPath("$._embedded.item[2].workerName") { value("borna") }
+            jsonPath("$._embedded.item[2]._links.car.href") {
+                value("http://localhost/cars/4") }
+
+            jsonPath("$._embedded.item[3].workerName") { value("ante") }
+            jsonPath("$._embedded.item[3]._links.car.href") {
+                value("http://localhost/cars/4") }
+
+            jsonPath("$._embedded.item[4].workerName") { value("mato") }
+            jsonPath("$._embedded.item[4]._links.car.href") {
+                value("http://localhost/cars/3") }
+
+            jsonPath("$._embedded.item[5].workerName") { value("ivica") }
+            jsonPath("$._embedded.item[5]._links.car.href") {
+                value("http://localhost/cars/4") }
+
+            jsonPath("$._embedded.item[6].workerName") { value("perica") }
+            jsonPath("$._embedded.item[6]._links.car.href") {
+                value("http://localhost/cars/4") }
+
+        }
+
     }
 
 }

@@ -3,15 +3,15 @@ package com.infinum.academyproject
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.infinum.academyproject.dto.AddCarCheckUpDTO
 import com.infinum.academyproject.dto.AddCarDTO
+import com.infinum.academyproject.dto.AddCarModelDTO
 import com.infinum.academyproject.models.Car
 import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.models.CarModel
 import com.infinum.academyproject.services.CarService
+import com.infinum.academyproject.services.HttpCarModelService
 import com.infinum.academyproject.services.SchedulingService
-import org.apache.catalina.manager.StatusTransformer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -32,7 +32,11 @@ import java.time.format.DateTimeFormatter
 @SpringBootTest
 @AutoConfigureMockMvc
 @MockServerTest
-class AcademyProjectApplicationTests {
+@MockBean(SchedulingService::class)
+class AcademyProjectApplicationTests @Autowired constructor(
+    private val httpService: HttpCarModelService,
+    private val carService: CarService
+){
 
     @Autowired
     lateinit var mvc: MockMvc
@@ -43,7 +47,8 @@ class AcademyProjectApplicationTests {
     lateinit var mockServerClient: MockServerClient
 
     @MockBean
-    lateinit var service: SchedulingService
+    lateinit var schedulingService: SchedulingService
+
 
     @BeforeEach
     fun setUp() {
@@ -55,25 +60,38 @@ class AcademyProjectApplicationTests {
             .respond(
                 HttpResponse.response()
                     .withStatusCode(200)
-                   // .withContentType(MediaType.APPLICATION_JSON)
+                    .withContentType(org.mockserver.model.MediaType.APPLICATION_JSON)
                     .withBody(
                         """
                         {
                             "data": [
-                                :[{"manufacturer":"Alfa Romeo","model_name":"145","is_common":0},
+                                {"manufacturer":"Alfa Romeo","model_name":"145","is_common":0},
                                 {"manufacturer":"Audi","model_name":"A6","is_common":0},
                                 {"manufacturer":"BMW","model_name":"530","is_common":0},
                                 {"manufacturer":"Fiat","model_name":"Punto","is_common":0},
                                 {"manufacturer":"Ford","model_name":"Fiesta","is_common":0},
-                                {"manufacturer":"Mazda","model_name":"323","is_common":0}
-                                {"manufacturer":"Nissan","model_name":"Juke","is_common":0}
+                                {"manufacturer":"Mazda","model_name":"323","is_common":0},
+                                {"manufacturer":"Nissan","model_name":"Juke","is_common":0},
                                 {"manufacturer":"Dacia","model_name":"Duster","is_common":0}
-
                             ]
                         }
                     """.trimIndent()
                     )
             )
+
+
+
+        val modelsClient : List<AddCarModelDTO> = httpService.getCarModels() ?: throw Exception("bzvz")
+
+        for (model in modelsClient) {
+            try {
+                carService.saveModel(model)
+            } catch(ex : DataIntegrityViolationException) {
+
+            }
+        }
+
+
     }
 
     val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")

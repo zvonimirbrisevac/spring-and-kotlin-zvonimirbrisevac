@@ -1,9 +1,6 @@
 package com.infinum.academyproject.services
 
-import com.infinum.academyproject.dto.AddCarCheckUpDTO
-import com.infinum.academyproject.dto.AddCarDTO
-import com.infinum.academyproject.dto.CarCheckUpDTO
-import com.infinum.academyproject.dto.CarDTO
+import com.infinum.academyproject.dto.*
 import com.infinum.academyproject.errors.IllegalCarModelException
 import com.infinum.academyproject.errors.NoCarIdException
 import com.infinum.academyproject.models.Car
@@ -59,6 +56,8 @@ class CarService(
                 return checkUpRepository.findUpcomingCheckUps(numMonths = 6, pageable = pageable).map { CarCheckUpDTO(it) }
         }
     }
+
+    fun saveCar(model: AddCarModelDTO)
 
     fun deleteAllCars() = carRepository.deleteAll()
 

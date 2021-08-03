@@ -9,6 +9,7 @@ import com.infinum.academyproject.models.CarCheckUp
 import com.infinum.academyproject.models.CarModel
 import com.infinum.academyproject.repositories.ModelRepository
 import com.infinum.academyproject.services.CarService
+import com.infinum.academyproject.services.HttpCarModelService
 import com.infinum.academyproject.services.SchedulingService
 import org.apache.catalina.manager.StatusTransformer
 import org.junit.jupiter.api.BeforeEach
@@ -22,8 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -35,21 +37,21 @@ import java.time.format.DateTimeFormatter
 @AutoConfigureMockMvc
 @MockServerTest
 @MockBean(SchedulingService::class)
-class AcademyProjectApplicationTests {
+class AcademyProjectApplicationTests @Autowired constructor(
+    private val httpService: HttpCarModelService,
+    private val carService: CarService
+){
 
     @Autowired
     lateinit var mvc: MockMvc
-
-//    @MockBean
-//    lateinit var modelRepository: ModelRepository
 
     @Autowired
     lateinit var objectMapper: ObjectMapper
 
     lateinit var mockServerClient: MockServerClient
 
-//    @MockBean
-//    lateinit var service: SchedulingService
+    @MockBean
+    lateinit var schedulingService: SchedulingService
 
 
     @BeforeEach
@@ -62,33 +64,37 @@ class AcademyProjectApplicationTests {
             .respond(
                 HttpResponse.response()
                     .withStatusCode(200)
-                   // .withContentType(MediaType.APPLICATION_JSON)
+                    .withContentType(org.mockserver.model.MediaType.APPLICATION_JSON)
                     .withBody(
                         """
                         {
                             "data": [
-                                :[{"manufacturer":"Alfa Romeo","model_name":"145","is_common":0},
+                                {"manufacturer":"Alfa Romeo","model_name":"145","is_common":0},
                                 {"manufacturer":"Audi","model_name":"A6","is_common":0},
                                 {"manufacturer":"BMW","model_name":"530","is_common":0},
                                 {"manufacturer":"Fiat","model_name":"Punto","is_common":0},
                                 {"manufacturer":"Ford","model_name":"Fiesta","is_common":0},
-                                {"manufacturer":"Mazda","model_name":"323","is_common":0}
-                                {"manufacturer":"Nissan","model_name":"Juke","is_common":0}
+                                {"manufacturer":"Mazda","model_name":"323","is_common":0},
+                                {"manufacturer":"Nissan","model_name":"Juke","is_common":0},
                                 {"manufacturer":"Dacia","model_name":"Duster","is_common":0}
-
                             ]
                         }
                     """.trimIndent()
                     )
             )
 
-        for (i in 0..4) {
-            mvc.post("/add-models-for-tests"){
-                content = objectMapper.writeValueAsString(AddCarModelDTO(models[i].manufacturer, models[i].modelName,
-                if (models[i].isCommon) 1 else 0 ))
-                contentType = MediaType.APPLICATION_JSON
+
+
+        val modelsClient : List<AddCarModelDTO> = httpService.getCarModels() ?: throw Exception("bzvz")
+
+        for (model in modelsClient) {
+            try {
+                carService.saveModel(model)
+            } catch(ex : DataIntegrityViolationException) {
+
             }
         }
+
 
     }
 
@@ -247,8 +253,8 @@ class AcademyProjectApplicationTests {
             content = objectMapper.writeValueAsString(
                 AddCarDTO(
                     ownerId = 113,
-                    manufacturer = "Peugeot",
-                    model = "206",
+                    manufacturer = "Fiat",
+                    model = "Punto",
                     productionYear = 2009,
                     serialNumber = "1223",
                 )
@@ -258,7 +264,8 @@ class AcademyProjectApplicationTests {
             status { is2xxSuccessful() }
             jsonPath("$.ownerId") { value(113) }
             jsonPath("$.addedDate") { value(LocalDate.now().toString()) }
-            jsonPath("$.manufacturer") { value("Peugeot") }
+            jsonPath("$.manufacturer") { value("Fiat") }
+            jsonPath("$.model") {value("Punto")}
             jsonPath("$.productionYear") { value(2009) }
             jsonPath("$.serialNumber") { value("1223") }
         }

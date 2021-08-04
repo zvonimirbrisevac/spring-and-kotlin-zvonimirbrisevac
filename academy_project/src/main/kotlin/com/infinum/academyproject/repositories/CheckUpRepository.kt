@@ -24,6 +24,8 @@ interface CheckUpRepository : Repository<CarCheckUp, Long> {
 
     fun findByWorkerNameAndPrice(workerName: String, price: Double): CarCheckUp
 
+    fun deleteById(id: Long)
+
     @Query(
         value = "select * from checkups c where c.time_and_date <= current_timestamp " +
                 "order by c.time_and_date desc",

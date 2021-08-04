@@ -21,4 +21,6 @@ interface CarRepository : Repository<Car, Long> {
 
     fun deleteAll()
 
+    fun deleteById(id: Long)
+
 }

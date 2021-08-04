@@ -59,6 +59,14 @@ class CarCheckUpController(
         return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpResourceAssembler), HttpStatus.OK)
     }
 
+    @GetMapping("{id}/delete")
+    fun deleteCheckUp(@PathVariable id: Long) : ResponseEntity<Unit> {
+        log.info("Deleting car check-up with id $id.")
+        carService.delereCarCheckUp(id)
+        return ResponseEntity.noContent().build()
+    }
+
+
 
     @ExceptionHandler(value = [(Exception::class)])
     fun handleException(ex: Exception): ResponseEntity<String> {

@@ -63,5 +63,9 @@ class CarService(
 
     fun deleteAllCarCheckUps() = checkUpRepository.deleteAll()
 
+    fun deleteCar(id: Long) = carRepository.deleteById(id)
+
+    fun delereCarCheckUp(id: Long) = checkUpRepository.deleteById(id)
+
 
 }

@@ -70,6 +70,13 @@ class CarController(
 
     }
 
+    @GetMapping("/{id}/delete")
+    fun deleteCar(@PathVariable id: Long): ResponseEntity<Unit> {
+        log.info("Deleting car with id $id.")
+        carService.deleteCar(id)
+        return ResponseEntity(Unit, HttpStatus.NO_CONTENT)
+    }
+
     @ExceptionHandler(value = [NoCarIdException::class, IllegalCarModelException::class])
     fun handleCustomException(ex: Exception): ResponseEntity<String> {
         log.error("${ex.message}", ex)

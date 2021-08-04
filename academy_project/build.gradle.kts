@@ -34,6 +34,10 @@ dependencies {
 	implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:4.24.0")
 	implementation("net.javacrumbs.shedlock:shedlock-spring:4.24.0")
 	implementation("org.springframework.boot:spring-boot-starter-hateoas")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity5")
+
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("com.ninja-squad:springmockk:3.0.1")
@@ -42,6 +46,8 @@ dependencies {
 	testImplementation("io.mockk:mockk:1.12.0")
 	testImplementation("org.testcontainers:postgresql")
 	testImplementation("org.mock-server:mockserver-spring-test-listener:5.11.2")
+	testImplementation("org.springframework.security:spring-security-test")
+
 
 }
 

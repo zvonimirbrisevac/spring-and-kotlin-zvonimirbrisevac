@@ -65,7 +65,10 @@ class CarService(
 
     fun deleteCar(id: Long) = carRepository.deleteById(id)
 
-    fun delereCarCheckUp(id: Long) = checkUpRepository.deleteById(id)
+    fun deleteCarCheckUp(id: Long) = checkUpRepository.deleteById(id)
+
+    fun getAllExistingModelsInBase(pageable: Pageable): Page<CarModelDTO> = modelRepository
+        .getAllExistingModelsInBase(pageable).map { CarModelDTO(it) }
 
 
 }

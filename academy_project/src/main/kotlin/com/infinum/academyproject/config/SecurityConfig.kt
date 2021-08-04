@@ -15,10 +15,8 @@ import org.springframework.security.web.SecurityFilterChain
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 class SecurityConfig {
 
-
     @Bean
     fun securityFilterChain(http: HttpSecurity) : SecurityFilterChain {
-
 
         http {
             cors {  }
@@ -32,8 +30,7 @@ class SecurityConfig {
                 authorize( HttpMethod.GET,"/car-checkups", hasAuthority("SCOPE_ADMIN"))
                 authorize( HttpMethod.POST, "/car-checkups", hasAuthority("SCOPE_ADMIN") )
                 authorize( HttpMethod.GET,"/cars/{id}", hasAuthority("SCOPE_USER"))
-                authorize( HttpMethod.GET,"/cars/{id}", hasAuthority("SCOPE_USER"))
-                authorize( HttpMethod.POST, "/directors", hasAuthority("SCOPE_DIRECTOR_MANAGER"))
+                authorize( HttpMethod.GET,"/cars/{id}/checkups", hasAuthority("SCOPE_USER"))
                 authorize(anyRequest, authenticated)
             }
             oauth2ResourceServer {

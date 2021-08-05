@@ -25,13 +25,14 @@ class SecurityConfig {
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
             authorizeRequests {
-                authorize( HttpMethod.GET,"/cars", hasAuthority("SCOPE_ADMIN"))
+                authorize( HttpMethod.GET,"/cars/**", hasAuthority("SCOPE_ADMIN"))
                 authorize( HttpMethod.POST,"/cars", hasAuthority("SCOPE_ADMIN SCOPE_USER"))
-                authorize( HttpMethod.GET,"/car-checkups", hasAuthority("SCOPE_ADMIN"))
+                authorize( HttpMethod.GET,"/car-checkups/**", hasAuthority("SCOPE_ADMIN"))
                 authorize( HttpMethod.POST, "/car-checkups", hasAuthority("SCOPE_ADMIN") )
                 authorize( HttpMethod.GET,"/cars/{id}", hasAuthority("SCOPE_USER"))
                 authorize( HttpMethod.GET,"/cars/{id}/checkups", hasAuthority("SCOPE_USER"))
-                authorize(anyRequest, authenticated)
+                authorize( HttpMethod.GET, "/models", permitAll)
+                //authorize(anyRequest, authenticated)
             }
             oauth2ResourceServer {
                 jwt {}

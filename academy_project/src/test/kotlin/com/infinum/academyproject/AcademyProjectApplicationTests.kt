@@ -1,6 +1,7 @@
 package com.infinum.academyproject
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.infinum.academyproject.config.SecurityConfig
 import com.infinum.academyproject.dto.AddCarCheckUpDTO
 import com.infinum.academyproject.dto.AddCarDTO
 import com.infinum.academyproject.dto.AddCarModelDTO
@@ -23,6 +24,9 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
 import org.springframework.jmx.support.JmxUtils
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.test.context.support.WithAnonymousUser
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
@@ -36,7 +40,8 @@ import java.time.format.DateTimeFormatter
 @MockBean(SchedulingService::class)
 class AcademyProjectApplicationTests @Autowired constructor(
     private val httpService: HttpCarModelService,
-    private val carService: CarService
+    private val carService: CarService,
+    private val securityConfig: SecurityConfig
 ){
 
     @Autowired
@@ -126,6 +131,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     )
 
     @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN SCOPE_USER"])
     fun testSimplePostCar() {
         val car = AddCarDTO(
             ownerId = 111,
@@ -140,11 +146,32 @@ class AcademyProjectApplicationTests @Autowired constructor(
             content = objectMapper.writeValueAsString(car)
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
-            status { is2xxSuccessful() }
+            status { isCreated() }
         }
     }
 
     @Test
+    @WithMockUser(authorities = ["SCOPE_USER"])
+    fun testSimplePostCarUser() {
+        val car = AddCarDTO(
+            ownerId = 111,
+            manufacturer = "Mazda",
+            model = "323",
+            productionYear = 1999,
+            serialNumber = "1111"
+
+        )
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(car)
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
     fun testSimplePostCarCheckUp() {
         mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
@@ -169,11 +196,42 @@ class AcademyProjectApplicationTests @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
 
         }.andExpect {
-            status { is2xxSuccessful() }
+            status { isCreated() }
         }
     }
 
     @Test
+    @WithMockUser(authorities = ["SCOPE_USER"])
+    fun testSimplePostCarCheckUpUser() {
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 222,
+                    manufacturer = "Dacia",
+                    model = "Duster",
+                    productionYear = 2019,
+                    serialNumber = "2222"
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse("2023-12-02 15:00", format),
+                    workerName = "pero", price = 1000.00, carId = 1
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+
+        }.andExpect {
+            status { isForbidden() }
+        }
+    }
+
+    @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun testAddCarCheckUpFail() {
 
         mvc.post("/car-checkups") {
@@ -191,6 +249,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
     fun testGetCarCheckUps() {
 
         mvc.post("/cars") {
@@ -291,14 +350,16 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun testGetCarCheckupsFail() {
         mvc.get("/cars/100/checkups")
             .andExpect {
-                status { is4xxClientError() }
+                status { isBadRequest() }
             }
     }
 
     @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN SCOPE_USER"])
     fun testPostCarInvalidModel() {
         val car = AddCarDTO(
             ownerId = 111,
@@ -309,15 +370,16 @@ class AcademyProjectApplicationTests @Autowired constructor(
 
         )
 
-        mvc.post("/cars/add") {
+        mvc.post("/cars") {
             content = objectMapper.writeValueAsString(car)
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
-            status { is4xxClientError() }
+            status { isBadRequest() }
         }
     }
 
     @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
     fun getLastTenCheckups() {
         mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
@@ -435,7 +497,9 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
     fun getUpcomingCheckUpsWeekAndHalfYear() {
+
         mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
                 AddCarDTO(
@@ -635,5 +699,178 @@ class AcademyProjectApplicationTests @Autowired constructor(
         }
 
     }
+
+    @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    fun getModelsInBase() {
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 201,
+                    manufacturer = "Mazda",
+                    model = "323",
+                    productionYear = 1999,
+                    serialNumber = "2001",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 200,
+                    manufacturer = "Mazda",
+                    model = "323",
+                    productionYear = 1999,
+                    serialNumber = "2000",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 200,
+                    manufacturer = "Nissan",
+                    model = "Juke",
+                    productionYear = 2005,
+                    serialNumber = "2002",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 203,
+                    manufacturer = "Fiat",
+                    model = "Punto",
+                    productionYear = 1995,
+                    serialNumber = "2007",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 204,
+                    manufacturer = "Alfa Romeo",
+                    model = "145",
+                    productionYear = 2008,
+                    serialNumber = "2008",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 204,
+                    manufacturer = "Fiat",
+                    model = "Punto",
+                    productionYear = 1999,
+                    serialNumber = "2010",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 200,
+                    manufacturer = "BMW",
+                    model = "530",
+                    productionYear = 2010,
+                    serialNumber = "2009",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.get("/models")
+            .andExpect {
+                status { is2xxSuccessful() }
+                jsonPath("$._embedded.item.length()") {value(5)}
+
+                jsonPath("$._embedded.item[0].manufacturer") { value("BMW") }
+                jsonPath("$._embedded.item[0].modelName") { value("530") }
+
+                jsonPath("$._embedded.item[1].manufacturer") { value("Mazda") }
+                jsonPath("$._embedded.item[1].modelName") { value("323") }
+
+                jsonPath("$._embedded.item[2].manufacturer") { value("Fiat") }
+                jsonPath("$._embedded.item[2].modelName") { value("Punto") }
+
+                jsonPath("$._embedded.item[3].manufacturer") { value("Nissan") }
+                jsonPath("$._embedded.item[3].modelName") { value("Juke") }
+
+                jsonPath("$._embedded.item[4].manufacturer") { value("Alfa Romeo") }
+                jsonPath("$._embedded.item[4].modelName") { value("145") }
+
+            }
+    }
+
+    @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    fun deleteCar() {
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 200,
+                    manufacturer = "Nissan",
+                    model = "Juke",
+                    productionYear = 2005,
+                    serialNumber = "2002",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.get("/cars/1/delete")
+            .andExpect {
+                status { isNoContent() }
+            }
+    }
+
+    @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    fun deleteCheckUp() {
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 200,
+                    manufacturer = "Nissan",
+                    model = "Juke",
+                    productionYear = 2005,
+                    serialNumber = "2002",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+
+        mvc.post("/car-checkups") {
+            content = objectMapper.writeValueAsString(
+                AddCarCheckUpDTO(
+                    timeAndDate = LocalDateTime.parse(format.format(LocalDateTime.now().plusDays(3)), format),
+                    workerName = "borna", price = 200.00, carId = 1)
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.get("/car-checkups/1/delete")
+            .andExpect {
+                status { isNoContent() }
+            }
+    }
+
+
 
 }

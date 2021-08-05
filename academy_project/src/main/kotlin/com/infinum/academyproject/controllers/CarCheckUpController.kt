@@ -9,6 +9,7 @@ import com.infinum.academyproject.resources.assemblers.CarCheckUpResourceAssembl
 import com.infinum.academyproject.services.CarService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.data.web.PagedResourcesAssembler
 import org.springframework.hateoas.PagedModel
 import org.springframework.http.HttpStatus
@@ -43,7 +44,7 @@ class CarCheckUpController(
             ResponseEntity<PagedModel<CarCheckUpResource>>{
         log.info("Fetching last 10 check-ups.")
         // val pageable: Pageable = Pageable.ofSize(10).withPage(0)
-        val pageable: Pageable = PageRequest.of(0, 10)
+        val pageable: Pageable = PageRequest.of(0, 10, Sort.Direction.DESC, "timeAndDate")
         val page = carService.getLastTenCheckUps(pageable)
         return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpResourceAssembler), HttpStatus.OK)
 

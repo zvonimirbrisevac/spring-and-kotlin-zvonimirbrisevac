@@ -36,7 +36,7 @@ class ControllerTest @Autowired constructor(
     //private val carCheckUpResourceAssembler: CarCheckUpResourceAssembler
 ) {
 
-
+/*
     @MockBean
     lateinit var service: CarService
 
@@ -315,5 +315,5 @@ class ControllerTest @Autowired constructor(
         }
     }
 
-
+*/
 }

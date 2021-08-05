@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.Repository
 import org.springframework.data.repository.query.Param
+import java.time.LocalDateTime
 
 interface CheckUpRepository : Repository<CarCheckUp, Long> {
 
@@ -26,6 +27,9 @@ interface CheckUpRepository : Repository<CarCheckUp, Long> {
 
     fun deleteById(id: Long)
 
+    //fun findByTimeAndDateBefore(pageable:Pageable, endTime: LocalDateTime): Page<CarCheckUp>
+
+    //drugačije mi ne radi pa sam ostavio ovako jer sam u žurbi, gledat ću da kasnije popravim
     @Query(
         value = "select * from checkups c where c.time_and_date <= current_timestamp " +
                 "order by c.time_and_date desc",

@@ -11,6 +11,8 @@ import com.infinum.academyproject.repositories.ModelRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Service
 class CarService(
@@ -18,6 +20,8 @@ class CarService(
     private val checkUpRepository : CheckUpRepository,
     private val modelRepository: ModelRepository
 ) {
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
     fun addCar(car: AddCarDTO): CarDTO {
         return CarDTO(carRepository.save(car.toCar {
@@ -46,7 +50,11 @@ class CarService(
     fun getLastTenCheckUps(pageable: Pageable): Page<CarCheckUpDTO> = checkUpRepository.findLastTenCheckUps(pageable)
         .map{ CarCheckUpDTO(it) }
 
+        /*checkUpRepository.findByTimeAndDateBefore(pageable,
+            LocalDateTime.parse(formatter.format(LocalDateTime.now()).toString(), formatter)).map{ CarCheckUpDTO(it) }*/
+
     fun getUpcomingCheckUps(durationFromNow: CarCheckUpDurationFromNow, pageable: Pageable) : Page<CarCheckUpDTO>{
+
         val durationString : String = when(durationFromNow) {
             CarCheckUpDurationFromNow.ONE_WEEK ->
                 return checkUpRepository.findUpcomingCheckUps(numWeeks = 1, pageable = pageable).map { CarCheckUpDTO(it) }
@@ -55,6 +63,23 @@ class CarService(
             CarCheckUpDurationFromNow.HALF_YEAR ->
                 return checkUpRepository.findUpcomingCheckUps(numMonths = 6, pageable = pageable).map { CarCheckUpDTO(it) }
         }
+
+        /*val durationString : String = when(durationFromNow) {
+                CarCheckUpDurationFromNow.ONE_WEEK ->
+                    return checkUpRepository.findByTimeAndDateBetweenOrderByTimeAndDate(
+                        LocalDateTime.parse(formatter.format(LocalDateTime.now()).toString(), formatter),
+                        LocalDateTime.parse(formatter.format(LocalDateTime.now().plusWeeks(1)).toString(), formatter),
+                        pageable).map { CarCheckUpDTO(it) }
+                CarCheckUpDurationFromNow.ONE_MONTH ->
+                    return checkUpRepository.findByTimeAndDateBetweenOrderByTimeAndDate(
+                        LocalDateTime.parse(formatter.format(LocalDateTime.now()).toString(), formatter),
+                        LocalDateTime.parse(formatter.format(LocalDateTime.now().plusMonths(1)).toString(), formatter),
+                        pageable).map { CarCheckUpDTO(it) }
+                CarCheckUpDurationFromNow.HALF_YEAR ->
+                    return checkUpRepository.findByTimeAndDateBetweenOrderByTimeAndDate(
+                        LocalDateTime.parse(formatter.format(LocalDateTime.now()).toString(), formatter),
+                        LocalDateTime.parse(formatter.format(LocalDateTime.now().plusMonths(6)).toString(), formatter),
+                        pageable).map { CarCheckUpDTO(it) }*/
     }
 
     fun saveModel(model: AddCarModelDTO) = modelRepository.save(model.toCarModel())

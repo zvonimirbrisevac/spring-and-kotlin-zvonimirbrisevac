@@ -1,11 +1,8 @@
 package com.infinum.academyproject.resources.assemblers
 
-import com.infinum.academyproject.controllers.CarController
 import com.infinum.academyproject.controllers.CarModelController
-import com.infinum.academyproject.dto.CarDTO
 import com.infinum.academyproject.dto.CarModelDTO
 import com.infinum.academyproject.resources.CarModelResource
-import com.infinum.academyproject.resources.CarResource
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport
 import org.springframework.stereotype.Component
 

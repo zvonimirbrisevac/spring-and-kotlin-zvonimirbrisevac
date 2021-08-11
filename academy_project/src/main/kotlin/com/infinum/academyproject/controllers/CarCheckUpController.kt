@@ -44,7 +44,7 @@ class CarCheckUpController(
             ResponseEntity<PagedModel<CarCheckUpResource>>{
         log.info("Fetching last 10 check-ups.")
         // val pageable: Pageable = Pageable.ofSize(10).withPage(0)
-        val pageable: Pageable = PageRequest.of(0, 10, Sort.Direction.DESC, "timeAndDate")
+        val pageable: Pageable = PageRequest.of(0, 10)
         val page = carService.getLastTenCheckUps(pageable)
         return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpResourceAssembler), HttpStatus.OK)
 
@@ -60,7 +60,7 @@ class CarCheckUpController(
         return ResponseEntity(pagedResourcesAssembler.toModel(page, carCheckUpResourceAssembler), HttpStatus.OK)
     }
 
-    @GetMapping("{id}/delete")
+    @DeleteMapping("/{id}")
     fun deleteCheckUp(@PathVariable id: Long) : ResponseEntity<Unit> {
         log.info("Deleting car check-up with id $id.")
         carService.deleteCarCheckUp(id)

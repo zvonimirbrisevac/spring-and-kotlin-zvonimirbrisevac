@@ -23,14 +23,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
-import org.springframework.jmx.support.JmxUtils
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.test.context.support.WithAnonymousUser
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -130,8 +128,29 @@ class AcademyProjectApplicationTests @Autowired constructor(
         CarCheckUp(0, LocalDateTime.parse("2014-04-25 09:35", format), "pejo", 210.00, cars[3])
     )
 
+
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_USER"])
+    fun testSimplePostCarUser() {
+        val car = AddCarDTO(
+            ownerId = 111,
+            manufacturer = "Mazda",
+            model = "323",
+            productionYear = 1999,
+            serialNumber = "1111"
+
+        )
+
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(car)
+            contentType = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isCreated() }
+        }
+    }
+
+    @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun testSimplePostCar() {
         val car = AddCarDTO(
             ownerId = 111,
@@ -151,8 +170,8 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_USER"])
-    fun testSimplePostCarUser() {
+    @WithAnonymousUser
+    fun testSimplePostCarAnonymous() {
         val car = AddCarDTO(
             ownerId = 111,
             manufacturer = "Mazda",
@@ -166,12 +185,12 @@ class AcademyProjectApplicationTests @Autowired constructor(
             content = objectMapper.writeValueAsString(car)
             contentType = MediaType.APPLICATION_JSON
         }.andExpect {
-            status { isForbidden() }
+            status { isUnauthorized() }
         }
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun testSimplePostCarCheckUp() {
         mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
@@ -249,7 +268,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun testGetCarCheckUps() {
 
         mvc.post("/cars") {
@@ -349,6 +368,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
 
     }
 
+
     @Test
     @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun testGetCarCheckupsFail() {
@@ -359,7 +379,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_USER"])
     fun testPostCarInvalidModel() {
         val car = AddCarDTO(
             ownerId = 111,
@@ -379,7 +399,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun getLastTenCheckups() {
         mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
@@ -497,7 +517,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun getUpcomingCheckUpsWeekAndHalfYear() {
 
         mvc.post("/cars") {
@@ -701,7 +721,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun getModelsInBase() {
         mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
@@ -818,7 +838,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun deleteCar() {
         mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
@@ -833,14 +853,36 @@ class AcademyProjectApplicationTests @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
         }
 
-        mvc.get("/cars/1/delete")
+        mvc.delete("/cars/1")
             .andExpect {
                 status { isNoContent() }
             }
     }
 
     @Test
-    @WithMockUser(authorities = ["SCOPE_ADMIN", "SCOPE_ADMIN SCOPE_USER"])
+    @WithMockUser(authorities = ["SCOPE_USER"])
+    fun deleteCarUser() {
+        mvc.post("/cars") {
+            content = objectMapper.writeValueAsString(
+                AddCarDTO(
+                    ownerId = 200,
+                    manufacturer = "Nissan",
+                    model = "Juke",
+                    productionYear = 2005,
+                    serialNumber = "2002",
+                )
+            )
+            contentType = MediaType.APPLICATION_JSON
+        }
+
+        mvc.delete("/cars/1")
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(authorities = ["SCOPE_ADMIN"])
     fun deleteCheckUp() {
         mvc.post("/cars") {
             content = objectMapper.writeValueAsString(
@@ -865,7 +907,7 @@ class AcademyProjectApplicationTests @Autowired constructor(
             contentType = MediaType.APPLICATION_JSON
         }
 
-        mvc.get("/car-checkups/1/delete")
+        mvc.delete("/car-checkups/1")
             .andExpect {
                 status { isNoContent() }
             }

@@ -70,7 +70,7 @@ class CarController(
 
     }
 
-    @GetMapping("/{id}/delete")
+    @DeleteMapping("/{id}")
     fun deleteCar(@PathVariable id: Long): ResponseEntity<Unit> {
         log.info("Deleting car with id $id.")
         carService.deleteCar(id)

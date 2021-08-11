@@ -16,23 +16,25 @@ import org.springframework.security.web.SecurityFilterChain
 class SecurityConfig {
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity) : SecurityFilterChain {
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
 
         http {
-            cors {  }
+            cors { }
             csrf { disable() }
             sessionManagement {
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
             authorizeRequests {
-                authorize( HttpMethod.GET,"/cars/**", hasAuthority("SCOPE_ADMIN"))
-                authorize( HttpMethod.POST,"/cars", hasAuthority("SCOPE_ADMIN SCOPE_USER"))
-                authorize( HttpMethod.GET,"/car-checkups/**", hasAuthority("SCOPE_ADMIN"))
-                authorize( HttpMethod.POST, "/car-checkups", hasAuthority("SCOPE_ADMIN") )
-                authorize( HttpMethod.GET,"/cars/{id}", hasAuthority("SCOPE_USER"))
-                authorize( HttpMethod.GET,"/cars/{id}/checkups", hasAuthority("SCOPE_USER"))
-                authorize( HttpMethod.GET, "/models", permitAll)
-                //authorize(anyRequest, authenticated)
+                authorize(HttpMethod.POST, "/cars", hasAnyAuthority("SCOPE_ADMIN", "SCOPE_USER"))
+                authorize(HttpMethod.GET, "/cars", hasAuthority("SCOPE_ADMIN"))
+                authorize(HttpMethod.GET, "/cars/{id}", hasAnyAuthority("SCOPE_ADMIN", "SCOPE_USER"))
+                authorize(HttpMethod.GET, "/cars/{id}/checkups", hasAnyAuthority("SCOPE_ADMIN", "SCOPE_USER"))
+                authorize(HttpMethod.DELETE, "/cars/{id}", hasAuthority("SCOPE_ADMIN"))
+                authorize(HttpMethod.POST, "/car-checkups", hasAuthority("SCOPE_ADMIN"))
+                authorize(HttpMethod.GET, "/car-checkups", hasAuthority("SCOPE_ADMIN"))
+                authorize(HttpMethod.GET, "/car-checkups/upcoming", hasAuthority("SCOPE_ADMIN"))
+                authorize(HttpMethod.DELETE, "/car-checkups", hasAuthority("SCOPE_ADMIN"))
+                authorize(HttpMethod.GET, "/models", permitAll)
             }
             oauth2ResourceServer {
                 jwt {}
